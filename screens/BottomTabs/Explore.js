@@ -235,11 +235,11 @@ export default class Explore extends Component {
 
                             <View className='flex-row justify-between'>
                                 <View className='self-center'>
-                                    <Text className='font-semibold self-center' style={{ fontSize: 20 }}>New Arrivals</Text>
+                                    <Text className='font-semibold self-center p-2' style={{ fontSize: 20 }}>New Arrivals</Text>
                                 </View>
                                 <View className='self-center'>
                                     <TouchableOpacity onPress={() => this._panel.show()}>
-                                        <Text className='font-light self-center' style={{ fontSize: 15 }}>See All</Text>
+                                        <Text className='font-light self-center p-2' style={{ fontSize: 15 }}>See All</Text>
                                     </TouchableOpacity>
                                 </View>
 

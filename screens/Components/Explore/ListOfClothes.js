@@ -32,7 +32,7 @@ const ListOfClothes = ({ selected, casualList, readyToWearList, numColumns, filt
                     <Image source={{ uri: item.images[0].src }} style={{ width: 200, height: 300, resizeMode: 'cover', borderTopRightRadius: 20, borderTopLeftRadius: 20 }} />
 
 
-                    <View className='flex-row w-32 justify-between bg-dark'>
+                    <View className='flex-row w-32 justify-between bg-dark p-3'>
                         <Text className='w-36' style={{ color: 'black' }}>{item.name}</Text>
                         <Text className='font-bold'>{item.price}</Text>
                     </View>

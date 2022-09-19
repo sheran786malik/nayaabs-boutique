@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import { AdjustmentsIcon, SearchIcon, BellIcon, ChevronLeftIcon, ChevronRightIcon, } from "react-native-heroicons/outline"
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AntDesign from "react-native-vector-icons/AntDesign"
-
+import Header from '../Components/Header/Header';
 import { auth, db } from '../../database/Firebase';
 
 export default class Profile extends Component {
@@ -25,17 +25,17 @@ export default class Profile extends Component {
             })
           })
       } else {
-      
+
       }
     });
   }
-  logOut(){
+  logOut() {
     auth
-    .signOut()
-    .then((data) => {
-      alert('Looking forward to seeing you again')
-      this.props.navigation.navigate('NotLoggedIn')
-    })
+      .signOut()
+      .then((data) => {
+        alert('Looking forward to seeing you again')
+        this.props.navigation.navigate('Login')
+      })
   }
 
   render() {
@@ -44,38 +44,9 @@ export default class Profile extends Component {
       <ScrollView>
         <SafeAreaView>
 
-          <View className='justify-between'
-            style={{
-              width: '100%',
-              flexDirection: 'row',
-              padding: 10,
-              backgroundColor: 'black',
-              flexDirection: 'row'
-            }}>
-
-            <TouchableOpacity onPress={() => this.props.navigation.goBack('Explore')}>
-
-              <ChevronLeftIcon
-                size={30}
-                style={{
-                  fontSize: 18,
-                  padding: 12,
-                  borderRadius: 12
-                }}
-                color='white'
-              />
-
-            </TouchableOpacity>
-
-            <Text>Profile</Text>
-            <TouchableOpacity onPress={() => this.props.navigation.navigate('Settings')}>
-              <AntDesign name='setting' size={30} color='white' />
-
-            </TouchableOpacity>
 
 
 
-          </View>
 
           <Image source={require('../../assets/background.png')} style={{ width: Dimensions.get('screen').width, height: Dimensions.get('screen').height / 3.5 }} />
 
@@ -139,7 +110,7 @@ export default class Profile extends Component {
           <View className='self-center ' style={{ color: 'black', borderWidth: 0.5, width: '80%' }} />
 
 
-          <TouchableOpacity onPress={() =>this.logOut()} className='bg-black p-5 w-80 self-center rounded-3xl mt-5'>
+          <TouchableOpacity onPress={() => this.logOut()} className='bg-black p-5 w-80 self-center rounded-3xl mt-5'>
             <Text className='text-center' style={{ color: 'white', fontWeight: '600' }}>Log out</Text>
           </TouchableOpacity>
         </SafeAreaView>
