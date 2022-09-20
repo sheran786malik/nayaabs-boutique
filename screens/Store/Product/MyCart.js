@@ -40,7 +40,7 @@ import { auth } from "../../../database/Firebase";
 const MyCart = () => {
   const items = useSelector(selectCartItems);
   const [cartItems, setCartItems] = useState([]);
-  const [total, setTotal] = useState(useSelector(selectCartTotal));
+  const total = useSelector(selectCartTotal);
   const [product, setProduct] = useState("");
   const [itemsExist, setItemsExist] = useState(false);
 
@@ -49,7 +49,6 @@ const MyCart = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log(items);
     // retrieveData();
 
     setCartItems(items);

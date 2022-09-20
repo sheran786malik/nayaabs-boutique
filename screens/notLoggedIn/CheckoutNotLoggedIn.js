@@ -107,8 +107,6 @@ export default function CheckoutNotLoggedIn({ navigation }) {
   // const handlePayPress = () => {
   //   console.log('Working')
   // }
-  console.log(totalPrice);
-
   return (
     <SafeAreaView style={{ backgroundColor: "#FBFBFD" }}>
       <KeyboardAwareScrollView>
@@ -119,7 +117,7 @@ export default function CheckoutNotLoggedIn({ navigation }) {
         />
 
         <View className="justify-around">
-          <Text className="p-5" style={{ fontWeight: "500", fontSize: 16 }}>
+          <Text className="p-3" style={{ fontWeight: "500", fontSize: 16 }}>
             Full Name
           </Text>
 
@@ -136,7 +134,7 @@ export default function CheckoutNotLoggedIn({ navigation }) {
             />
           </View>
 
-          <Text className="p-5" style={{ fontWe: "500", fontSize: 16 }}>
+          <Text className="p-3" style={{ fontWe: "500", fontSize: 16 }}>
             Email Address
           </Text>
           <View
@@ -153,7 +151,7 @@ export default function CheckoutNotLoggedIn({ navigation }) {
             />
           </View>
 
-          <Text className="p-5" style={{ fontWe: "500", fontSize: 16 }}>
+          <Text className="p-3" style={{ fontWeight: "500", fontSize: 16 }}>
             Address
           </Text>
 
@@ -171,7 +169,7 @@ export default function CheckoutNotLoggedIn({ navigation }) {
             />
           </View>
 
-          <Text className="p-5" style={{ fontWe: "500", fontSize: 16 }}>
+          <Text className="p-3" style={{ fontWe: "500", fontSize: 16 }}>
             Phone Number
           </Text>
 
@@ -189,12 +187,12 @@ export default function CheckoutNotLoggedIn({ navigation }) {
             />
           </View>
 
-          <View className="p-10">
+          <View className="p-5">
             <Text
               className="self-center"
-              style={{ fontSize: 15, fontWeight: "500" }}
+              style={{ fontSize: 25, fontWeight: "500" }}
             >
-              Total:{parseInt(totalPrice).toFixed(2)}
+              Total: {parseInt(totalPrice).toFixed(2)}
             </Text>
           </View>
         </View>

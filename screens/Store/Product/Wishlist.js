@@ -3,6 +3,7 @@ import {
   FlatList,
   Image,
   SafeAreaView,
+  StyleSheet,
   TouchableOpacity,
   Text,
   View,
@@ -25,14 +26,22 @@ import { auth, db } from "../../../database/Firebase";
 
 import { useNavigation } from "@react-navigation/native";
 
-const Favourites = () => {
-  const [data, setData] = useState([]);
+import Card from "../../Components/Explore/Card";
+import AddToCartButton from "../../Components/SingleProduct/AddToCartButton";
+
+import { useDispatch } from "react-redux";
+import { addToBasket } from "../../../features/cartSlice";
+
+const Wishlist = () => {
+  const [Data, setData] = useState([]);
   const [userID, setUserID] = useState("");
 
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     getInformation();
+    getData();
     return () => {};
   }, []);
 
@@ -40,94 +49,50 @@ const Favourites = () => {
     auth.onAuthStateChanged((user) => {
       if (user) {
         setUserID(user.uid);
-        db.collection("users")
-          .doc(user.uid)
-          .collection("products")
-          .onSnapshot((docs) => {
-            docs.forEach((res) => {
-              setData(res.data());
-            });
-
-            // let products = []
-            // products.push(docs.data())
-            // this.setState({ data: products, allProducts: products, filteredProducts: products })
-          });
       } else {
         setUserID(null);
       }
     });
   };
 
-  const Item = ({ id, name, image, orderStatus, price, favourite }) => (
-    <View
-      className="bg-white rounded-3xl m-3 flex-col self-center"
-      style={{
-        width: Dimensions.get("screen").width / 2.5,
-        resizeMode: "contain",
-      }}
-    >
-      {favourite ? (
-        <View>
-          <AntDesign
-            style={{ zIndex: 999, position: "absolute", right: 10, top: 10 }}
-            name="heart"
-            size={30}
-            color="black"
+  const getData = async () => {
+    fetch("https://dummyjson.com/products")
+      .then((data) => data.json())
+      .then((data) => setData(data.products));
+  };
+
+  const renderAllProducts = ({ item }) => {
+    return (
+      <Card>
+        <View className="flex flex-col ">
+          <Image
+            source={{ uri: item.images[0] }}
+            style={{ width: 100, height: 100, border: 1 }}
+            className="self-center"
           />
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("Product", {
-                productID: id,
-              })
-            }
-          >
-            <Image
-              className="self-center"
-              style={{ width: 100, height: 100, resizeMode: "contain" }}
-              source={{ uri: image }}
-            />
+          <HeartIcon style={styles.close} size={25} />
 
-            <Text
-              className="self-center"
-              style={{ fontSize: 20, textAlign: "left" }}
-            >
-              {name}
-            </Text>
-            <Text className="font-bold self-center" style={{ fontSize: 20 }}>
-              {price}
-            </Text>
-          </TouchableOpacity>
+          <Text className="text-center">{item.title}</Text>
+          <Text className="text-center font-bold mt-3"> £{item.price}</Text>
         </View>
-      ) : null}
-    </View>
-  );
-
-  const renderItem = ({ item }) => (
-    <View className="bg-grey m-2 rounded-md">
-      <Item
-        id={item.id}
-        favourite={item.favourite}
-        name={item.name}
-        image={item.image}
-        price={item.price}
-      />
-    </View>
-  );
+      </Card>
+    );
+  };
   return (
-    <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
+    <SafeAreaView style={{ backgroundColor: "#FBFBFD", flex: 1 }}>
       <Header
         navigation={navigation}
         title="My Wishlist"
         pageToGoBackTo={"Explore"}
       />
+
       {userID ? (
-        <View>
-          <FlatList
-            data={data}
-            renderItem={renderItem}
-            key={(data) => data.id}
-          />
-        </View>
+        <FlatList
+          data={Data}
+          numColumns={2}
+          renderItem={renderAllProducts}
+          keyExtractor={(item) => item.id}
+        />
       ) : (
         <View>
           <View className="justify-center items-center align-middle h-5/6">
@@ -182,4 +147,15 @@ const Favourites = () => {
   );
 };
 
-export default Favourites;
+export default Wishlist;
+
+const styles = StyleSheet.create({
+  close: {
+    margin: 5,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 25,
+    height: 25,
+  },
+});

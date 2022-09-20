@@ -18,7 +18,13 @@ import LOGO from "../../../assets/nayaabslogo.png";
 
 const OrderConfirmation = ({ route }) => {
   const [cartItems, setCartItems] = useState(useSelector(selectCartItems));
-  const [today, setToday] = useState("");
+  const today = new Date();
+  const date =
+    today.getFullYear() +
+    "-" +
+    (today.getMonth() + 1) +
+    "-" +
+    (today.getDate() + 3);
   const [name, setName] = useState("");
 
   const { fullName, address, phoneNumber } = route.params;
@@ -29,16 +35,16 @@ const OrderConfirmation = ({ route }) => {
       setTodaysDateForDelivery();
     };
   }, []);
-  const setTodaysDateForDelivery = () => {
-    let today = new Date();
-    let date =
-      today.getFullYear() +
-      "-" +
-      (today.getMonth() + 1) +
-      "-" +
-      (today.getDate() + 3);
-    setToday(date);
-  };
+  // const setTodaysDateForDelivery = () => {
+  //   let today = new Date();
+  //   let date =
+  //     today.getFullYear() +
+  //     "-" +
+  //     (today.getMonth() + 1) +
+  //     "-" +
+  //     (today.getDate() + 3);
+  //   setToday(date);
+  // };
   const continueShopping = () => {
     navigation.navigate("Explore");
   };
@@ -83,7 +89,7 @@ const OrderConfirmation = ({ route }) => {
         })}
         <View className="flex-row justify-between pb-3">
           <Text style={{ color: "white" }}>Estimated Delivery</Text>
-          <Text style={{ color: "white" }}>{today}</Text>
+          <Text style={{ color: "white" }}>{date.toString()}</Text>
         </View>
 
         <Text

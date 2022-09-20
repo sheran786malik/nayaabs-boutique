@@ -1,4 +1,10 @@
-import { SafeAreaView, TouchableOpacity, Text, View } from "react-native";
+import {
+  SafeAreaView,
+  TouchableOpacity,
+  Text,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import React, { Component, useState, useEffect } from "react";
 import CheckBox from "react-native-check-box";
 import {
@@ -27,49 +33,45 @@ import { selectCartItems, selectCartTotal } from "../../features/cartSlice";
 
 const CheckoutLoggedIn = () => {
   const [homeIsChecked, setHomeIsChecked] = useState(false);
-  const [deliveryFee, setDeliveryFee] = useState(parseInt(3.95));
-  const [userID, setUserID] = useState("");
-  const [price, setPrice] = useState(useSelector(selectCartTotal));
+  const deliveryFee = parseInt(3.95);
 
   const [userData, setUserData] = useState([]);
-  const [fullName, setFullName] = useState("an error has occured");
-  const [address, setAddress] = useState("an error has occured");
-  const [email, setEmail] = useState("an error has occured");
-  const [phoneNumber, setPhoneNumber] = useState("an error has occured");
-  const [cartItems, setCartItems] = useState(useSelector(selectCartItems));
+  const price = useSelector(selectCartTotal);
+  const cartItems = useSelector(selectCartItems);
 
   const navigation = useNavigation();
 
   useEffect(() => {
-    return () => {
-      getData();
-      getInformation();
-    };
+    getInformation();
+    return () => {};
   }, []);
 
-  const getData = () => {
+  const getInformation = () => {
     auth.onAuthStateChanged((user) => {
       if (user) {
-        setUserID(user.uid);
+        db.collection("users")
+          .doc(user.uid)
+          .get()
+          .then((data) => {
+            console.log(data.data());
+            setUserData({
+              fullName: data.data().fullName,
+              emailAddress: data.data().emailAddress,
+              phoneNo: data.data().phoneNo,
+              address: data.data().address,
+            });
+          })
+          .catch((error) => {
+            // setFullName("an error has occured"),
+            //   setAddress("an error has occured"),
+            //   setPhoneNumber("an error has occured"),
+            //   setEmail("an error has occured"),
+            console.log(error, "no data has come");
+          });
+      } else {
+        navigation.navigate("Checkout-login");
       }
-      navigation.navigate("Checkout-login");
     });
-  };
-
-  const getInformation = () => {
-    db.collection("users")
-      .doc(userID)
-      .get()
-      .then((data) => {
-        setUserData(data.data());
-      })
-      .catch((error) => {
-        // setFullName("an error has occured"),
-        //   setAddress("an error has occured"),
-        //   setPhoneNumber("an error has occured"),
-        //   setEmail("an error has occured"),
-        console.log(error, "no data has come");
-      });
   };
 
   return (
@@ -107,7 +109,7 @@ const CheckoutLoggedIn = () => {
           <View className="self-center">
             <Text style={{ fontSize: 16 }}>Home</Text>
             <Text style={{ fontSize: 12, color: "lightgrey" }}>
-              {userData.address}
+              {userData ? userData.address : "An error has occured"}
             </Text>
           </View>
         </View>
@@ -164,14 +166,17 @@ const CheckoutLoggedIn = () => {
             <PaymentIcon type="master" width={100} />
           </View>
 
-          <Payment
-            email={userData.emailAddress}
-            fullName={userData.fullName}
-            address={userData.address}
-            totalPrice={useSelector(selectCartTotal)}
-            cartItems={cartItems}
-            phoneNumber={userData.phoneNo}
-          />
+          {userData ? (
+            <Payment
+              email={userData.emailAddress}
+              fullName={userData.fullName}
+              address={userData.address}
+              totalPrice={useSelector(selectCartTotal)}
+              cartItems={cartItems}
+              phoneNumber={userData.phoneNo}
+              delivery={homeIsChecked ? true : false}
+            />
+          ) : null}
         </View>
       </SafeAreaView>
     </KeyboardAwareScrollView>

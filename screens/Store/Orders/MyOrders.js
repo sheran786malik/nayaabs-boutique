@@ -15,9 +15,13 @@ import { auth, db } from "../../../database/Firebase";
 import { useNavigation } from "@react-navigation/native";
 
 import Swipeout from "react-native-swipeout";
+import { WooCommerce } from "../../../database/WoocommerceAPI";
 
-export const MyOrders = () => {
-  const [orders, setOrders] = useState([]);
+import Card from "../../Components/Explore/Card";
+import { HeartIcon } from "react-native-heroicons/outline";
+
+const MyOrders = () => {
+  const [Orders, setOrders] = useState([]);
   const [ordersExist, setOrdersExist] = useState(false);
 
   // state = {
@@ -27,30 +31,26 @@ export const MyOrders = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    getData();
+    getInformation();
     return () => {};
   }, []);
 
-  const getData = () => {
+  const getInformation = () => {
     auth.onAuthStateChanged((user) => {
       if (user) {
         db.collection("users")
           .doc(user.uid)
           .collection("orders")
           .get()
-          .then((snapshot) => {
-            let orders = [];
-            snapshot.forEach((data) => {
-              orders.push(data.data());
-            });
-            setOrders(orders[0].cartItems);
-          });
-        setOrdersExist(true);
+          .then((data) =>
+            data.forEach((dat) => console.log(setOrders(dat.data().cartItems)))
+          );
+      } else {
       }
     });
   };
 
-  const renderItem = ({ item }) => {
+  const renderAllProducts = ({ item }) => {
     let swipeoutBtns = [
       {
         text: "Delete",
@@ -62,56 +62,22 @@ export const MyOrders = () => {
       },
     ];
     return (
-      <Swipeout right={swipeoutBtns} style={{ backgroundColor: "white" }}>
-        <View>
-          <View className="flex-row">
-            <Image
-              source={{ uri: item.image }}
-              style={{
-                resizeMode: "contain",
-                width: 150,
-                height: 150,
-                marginBottom: 10,
-              }}
-            />
-            <View className="flex-col justify-evenly mb-5">
-              <Text
-                className="w-52"
-                style={{
-                  fontWeight: "400",
-                  fontSize: 14,
-                  color: "black",
-                  opacity: 0.5,
-                }}
-              >
-                {item.name}
-              </Text>
-              <View className="flex-row">
-                <Text
-                  className="pr-3 self-center"
-                  style={{ fontWeight: "500", fontSize: 13, color: "grey" }}
-                >
-                  Qty{item.quantity}
-                </Text>
-                <Text style={{ fontWeight: "200", fontSize: 13 }}>
-                  {item.size}
-                </Text>
-              </View>
-              <Text style={{ fontWeight: "500", fontSize: 16 }}>
-                {item.price}
-              </Text>
+      <Swipeout right={swipeoutBtns} style={{}}>
+        <View className="p-5">
+          <View className="flex flex-row ">
+            <View className="flex flex-col">
+              <Image
+                source={{ uri: "" }}
+                style={{ width: 100, height: 100, border: 1 }}
+                className="self-center"
+              />
             </View>
-            <View className="self-center">
-              {/* <Text
-                style={{
-                  fontWeight: "400",
-                  fontSize: 14,
-                  color: "black",
-                  opacity: 0.5,
-                }}
-              >
-                {item.expDelivery}
-              </Text> */}
+
+            <View className="flex flex-col">
+              <Text className="">{item.id}</Text>
+              <Text className="w-52">{item.name}</Text>
+              <Text className="font-bold mt-3"> £{item.price}</Text>
+              <Text className=" font-bold mt-3"> £{item.size}</Text>
             </View>
           </View>
         </View>
@@ -119,33 +85,20 @@ export const MyOrders = () => {
     );
   };
 
-  if (!ordersExist) {
-    return (
-      <SafeAreaView className="bg-white">
-        <Header
-          title={"Profile"}
-          pageToGoBackTo="Profile"
-          navigation={navigation}
-        />
-        <NoOrders navigation={navigation} />
-      </SafeAreaView>
-    );
-  } else if (ordersExist) {
+  {
     return (
       <SafeAreaView>
-        <View className="bg-white">
-          <Header
-            navigation={navigation}
-            pageToGoBackTo="Profile"
-            title={"My Orders"}
-          />
+        <Header
+          navigation={navigation}
+          pageToGoBackTo="Profile"
+          title={"My Orders"}
+        />
 
-          <FlatList
-            data={orders}
-            renderItem={renderItem}
-            key={(data) => data.id}
-          />
-        </View>
+        <FlatList
+          data={Orders}
+          renderItem={renderAllProducts}
+          key={(data) => data.id}
+        />
       </SafeAreaView>
     );
   }

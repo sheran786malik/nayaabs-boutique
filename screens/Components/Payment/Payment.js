@@ -19,14 +19,16 @@ import React, { Component, useState, useEffect } from "react";
 import { WooCommerce } from "../../../database/WoocommerceAPI";
 import { useNavigation } from "@react-navigation/native";
 import { auth, db } from "../../../database/Firebase";
+import { useDispatch, useSelector } from "react-redux";
+import { clear_cart, selectCartTotal } from "../../../features/cartSlice";
 
 export const Payment = ({
   fullName,
   address,
   email,
   cartItems,
-  totalPrice,
   phoneNumber,
+  delivery,
 }) => {
   // const [fullName, setFullName] = useState(fullName)
   // const [address, setAddress] = useState(address)
@@ -36,16 +38,21 @@ export const Payment = ({
   const [cardDetails, setCardDetails] = useState(cardDetails);
   const { confirmPayment, loading } = useConfirmPayment();
   const [userID, setUserID] = useState("");
+  const totalPrice = useSelector(selectCartTotal);
 
-  const getSignedInUser = () => {
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        return user.uid;
-      } else {
-        return "Guest";
-      }
-    });
-  };
+  const today = new Date();
+  const date =
+    today.getFullYear() +
+    "-" +
+    (today.getMonth() + 1) +
+    "-" +
+    (today.getDate() + 3);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    return () => {};
+  }, []);
 
   // const [totalPrice, setTotalPrice] = useState(totalPrice)
 
@@ -91,14 +98,30 @@ export const Payment = ({
           alert("Payment Successful");
           console.log("Payment Successful", paymentIntent.id);
           console.log(cartItems, "have been purchased");
-
           postToWoocommerce();
-          sendToDb();
+
+          auth.onAuthStateChanged((user) => {
+            if (user) {
+              sendToDb("User", user.uid);
+            } else {
+              sendToDb("Guest");
+            }
+          });
         }
       }
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const getSignedInUser = () => {
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        return user.uid;
+      } else {
+        return "Guest";
+      }
+    });
   };
   const postToWoocommerce = () => {
     let name = fullName.split(" ");
@@ -138,52 +161,64 @@ export const Payment = ({
         country: "UK",
       },
       line_items: line_items,
-      shipping_lines: [
-        {
-          method_id: "flat_rate",
-          method_title: "Flat Rate",
-          total: "3.95",
-        },
-      ],
+      shipping_lines: delivery
+        ? {
+            method_id: "flat_rate",
+            method_title: "Flat Rate",
+            total: "3.95",
+          }
+        : null,
     };
 
     WooCommerce.post("orders", data).then((response) => {
       if (response) {
-        return true;
+        navigation.navigate("OrderConfirm", {
+          fullName: fullName,
+          address: address,
+          // totalPrice: totalPrice,
+          totalPrice: totalPrice,
+          cartItems: cartItems,
+          phoneNumber: phoneNumber,
+        });
+        dispatch(clear_cart());
       }
       return false;
     });
   };
 
-  const sendToDb = async () => {
-    const randomNumber = Math.floor(Math.random() * 100);
+  const sendToDb = (userType, uid) => {
     console.log("order has gone to wp");
+    const randomNumber = Math.floor(Math.random() * 100) + 1;
 
-    await db
-      .collection("users")
-      // .doc(userID)
-      .doc(getSignedInUser())
-      .collection("orders")
-      .doc(randomNumber.toString())
-      .set({
-        cartItems: cartItems,
-      })
-      .then((data) => {
-        console.log("order has gone to database");
-        navigation.navigate(
-          "Home",
-          { screen: "OrderConfirm" },
-          {
-            fullName: fullName,
-            address: address,
-            totalPrice: totalPrice,
-            cartItems: cartItems,
-            phoneNumber: phoneNumber,
-          }
-        );
-        return true;
-      })
-      .catch((error) => console.log(error));
+    if (userType === "User") {
+      db.collection("users")
+        // .doc(userID)
+        .doc(uid)
+        .collection("orders")
+        .doc(randomNumber.toString())
+        .set({
+          date: date,
+          cartItems: cartItems,
+        })
+        .then((data) => {
+          console.log("order has gone to database");
+        })
+        .catch((error) => console.log(error));
+    } else {
+      db.collection("guest")
+        // .doc(userID)
+        .doc(randomNumber.toString())
+        .collection("orders")
+        .doc(randomNumber.toString())
+        .set({
+          date: date,
+          cartItems: cartItems,
+        })
+        .then((data) => {
+          console.log("order has gone to database");
+        })
+        .catch((error) => console.log(error));
+    }
   };
   return (
     <View>

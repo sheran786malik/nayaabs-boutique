@@ -26,7 +26,7 @@ import MyCart from "./screens/Store/Product/MyCart";
 import CheckoutLoggedIn from "./screens/loggedIn/CheckoutLoggedIn";
 import AllProducts from "./screens/Store/Product/AllProducts";
 import Settings from "./screens/Settings";
-import Favourites from "./screens/Store/Product/Favourites";
+import Wishlist from "./screens/Store/Product/Wishlist";
 import AddCreditCard from "./screens/Store/AddCreditCard";
 import CheckoutNotLoggedIn from "./screens/notLoggedIn/CheckoutNotLoggedIn";
 import SlidingUpPanel from "rn-sliding-up-panel";
@@ -152,7 +152,7 @@ export default class App extends React.Component {
                 initialRouteName="Home"
                 activeColor="black"
                 barStyle={{ backgroundColor: "white" }}
-                screenOptions={{ headerShown: false }}
+                screenOptions={{ headerShown: false, unmountOnBlur: true }}
               >
                 <Tab.Screen
                   name="Home"
@@ -172,10 +172,10 @@ export default class App extends React.Component {
                   }}
                 />
                 <Tab.Screen
-                  name="Favourite"
-                  component={Favourites}
+                  name="Wishlist"
+                  component={Wishlist}
                   options={{
-                    tabBarLabel: "Favourites",
+                    tabBarLabel: "Wishlist",
                     tabBarIcon: () => <HeartIcon size={26} color="black" />,
                   }}
                 />
@@ -265,6 +265,11 @@ function ExploreStack() {
       <Stack.Screen
         name="Checkout-login"
         component={CheckoutLogin}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Checkout-not-logged-in"
+        component={CheckoutNotLoggedIn}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

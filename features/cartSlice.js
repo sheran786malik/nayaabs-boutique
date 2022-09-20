@@ -8,24 +8,20 @@ export const cartSlice = createSlice({
   initialState,
   reducers: {
     addToBasket: (state, { payload }) => {
-      // state.cartItems = [...state.cartItems, action.payload]
-      const item = state.cartItems.find((data) => data.name === payload.name);
+      const item = state.cartItems.find(
+        (data) => data.id === payload.id && data.size === payload.size
+      );
       if (item) {
-        for (let index = 0; index < state.cartItems.length; index++) {
-          if (state.cartItems[index].size === payload.size) {
-            console.log("match and quantity increased");
-            state.cartItems.map((data) => {
-              data
-                ? {
-                    ...data,
-                    quantity: data.quantity++,
-                  }
-                : data;
-            });
-          } else {
-            state.cartItems.push(payload);
+        state.cartItems.map((data) => {
+          if (data.id === item.id) {
+            data
+              ? {
+                  ...data,
+                  quantity: data.quantity++,
+                }
+              : data;
           }
-        }
+        });
       } else {
         state.cartItems.push(payload);
       }
@@ -56,6 +52,9 @@ export const cartSlice = createSlice({
         item.quantity--;
       }
     },
+    clear_cart: (state, action) => {
+      return initialState;
+    },
   },
 });
 
@@ -64,6 +63,7 @@ export const {
   removeFromBasket,
   increaseQuantityOfItem,
   decreaseQuantityOfItem,
+  clear_cart,
 } = cartSlice.actions;
 
 export const selectCartItemsItemsWithID = (state, id) => {

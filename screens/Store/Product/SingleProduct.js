@@ -7,6 +7,7 @@ import {
   View,
   Text,
   Dimensions,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
@@ -17,6 +18,7 @@ import {
   PlusIcon,
   MinusIcon,
   ThumbDownIcon,
+  HeartIcon,
 } from "react-native-heroicons/outline";
 import { useNavigation } from "@react-navigation/native";
 import { DATA } from "../../BottomTabs/Explore";
@@ -33,16 +35,20 @@ import {
   cartItems,
   selectCartItems,
 } from "../../../features/cartSlice";
+import ProductListing from "../../Components/SingleProduct/ProductListing";
+
+import AddToCartButton from "../../Components/SingleProduct/AddToCartButton";
+import DoubleClick from "react-native-double-tap";
+import SizeContainer from "../../Components/SingleProduct/SizeContainer";
+import SizeBox from "../../Components/SingleProduct/SizeBox";
 
 const SingleProduct = ({ navigation, route }) => {
   const { productID, productName } = route.params;
-  const [item, setItem] = useState([]);
   const [size, setSize] = useState("");
   const [favourite, setFavourite] = useState(false);
 
   const [userID, setUserID] = useState("");
-
-  const items = useSelector(selectCartItems);
+  const [item, setItem] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -51,13 +57,14 @@ const SingleProduct = ({ navigation, route }) => {
     getSignedInUser();
   }, []);
 
-  const fetchInfo = () => {
-    WooCommerce.get("products", { per_page: 25 }).then((data) => {
+  const fetchInfo = async () => {
+    WooCommerce.get("products", { per_page: 30 }).then((data) => {
       for (let index = 0; index < data.length; index++) {
         if (data[index].id === productID) {
           setItem(data[index]);
         }
       }
+      console.log(item);
     });
   };
 
@@ -70,13 +77,13 @@ const SingleProduct = ({ navigation, route }) => {
   };
 
   const addToCart = (data) => {
-    // let images = data.images[0].src
+    let images = data?.images[0]?.src;
 
     dispatch(
       addToBasket({
         id: data.id,
         name: data.name,
-        image: data.images[0].src,
+        image: images,
         favourite: favourite,
         size: size,
         quantity: 1,
@@ -156,160 +163,70 @@ const SingleProduct = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Header
-        pageToGoBackTo={"Explore"}
-        navigation={navigation}
-        title="Product Details"
-      />
-      {favourite === true ? (
-        <TouchableOpacity onPress={() => addToFavourites(item)}>
-          <AntDesign
-            style={{
-              zIndex: 999,
-              position: "absolute",
-              right: 10,
-              top: 10,
+      <View className="bg-gray-300">
+        <View>
+          <DoubleClick
+            singleTap={() => {
+              console.log("single tap");
             }}
-            name="heart"
-            size={40}
-            color="white"
-          />
-        </TouchableOpacity>
-      ) : null}
-      {favourite === false ? (
-        <TouchableOpacity onPress={() => deleteFromFavourites(item)}>
-          <AntDesign
-            style={{
-              zIndex: 999,
-              position: "absolute",
-              right: 10,
-              top: 10,
-            }}
-            name="heart"
-            size={40}
-            color="white"
-          />
-        </TouchableOpacity>
-      ) : null}
-
-      <View
-        style={{
-          backgroundColor: "white",
-          borderTopRightRadius: 45,
-          borderTopLeftRadius: 45,
-        }}
-      >
-        <View className="flex-row justify-between p-2 w-80">
-          <Text className="w-52" style={{ fontWeight: "500", fontSize: 20 }}>
-            {item.name}
-          </Text>
-          <Text style={{ fontSize: 18, fontWeight: "500" }}>{item.price}</Text>
+            doubleTap={() => {}}
+            delay={200}
+          >
+            <TouchableOpacity>
+              <Image
+                source={{
+                  uri: "",
+                }}
+                style={{
+                  width: Dimensions.get("screen").width,
+                  resizeMode: "contain",
+                  height: Dimensions.get("screen").height / 2.1,
+                }}
+              />
+            </TouchableOpacity>
+          </DoubleClick>
         </View>
-        <Text className="pl-5 pb-1" style={{ color: "grey" }}>
-          Size
-        </Text>
-        <View
-          className="pl-5 flex-row w-42 mr-5"
-          style={{ backgroundColor: "white" }}
-        >
+        <ProductListing data={item} />
+        <SizeContainer>
           <TouchableOpacity onPress={() => setSize("XS")}>
-            <View
-              className="p-2 mr-2"
-              style={{
-                borderWidth: 1,
-                borderColor: "black",
-                backgroundColor: size == "XS" ? "black" : "white",
-              }}
-            >
-              <Text
-                className="text-center"
-                style={{ color: size == "XS" ? "white" : "black" }}
-              >
-                XS
-              </Text>
-            </View>
+            {size === "XS" ? (
+              <SizeBox size="XS" selected={true} />
+            ) : (
+              <SizeBox size="XS" selected={false} />
+            )}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setSize("S")}>
-            <View
-              className="p-2 mr-2"
-              style={{
-                borderWidth: 1,
-                borderColor: "black",
-                backgroundColor: size == "S" ? "black" : "white",
-              }}
-            >
-              <Text
-                className="text-center"
-                style={{ color: size == "S" ? "white" : "black" }}
-              >
-                S
-              </Text>
-            </View>
+            {size === "S" ? (
+              <SizeBox size="S" selected={true} />
+            ) : (
+              <SizeBox size="S" selected={false} />
+            )}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setSize("M")}>
-            <View
-              className="p-2 mr-2"
-              style={{
-                borderWidth: 1,
-                borderColor: "black",
-                backgroundColor: size == "M" ? "black" : "white",
-              }}
-            >
-              <Text
-                className="text-center"
-                style={{ color: size == "M" ? "white" : "black" }}
-              >
-                M
-              </Text>
-            </View>
+            {size === "M" ? (
+              <SizeBox size="M" selected={true} />
+            ) : (
+              <SizeBox size="M" selected={false} />
+            )}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setSize("L")}>
-            <View
-              className="p-2 mr-2"
-              style={{
-                borderWidth: 1,
-                borderColor: "black",
-                backgroundColor: size == "L" ? "black" : "white",
-              }}
-            >
-              <Text
-                className="text-center"
-                style={{ color: size == "L" ? "white" : "black" }}
-              >
-                L
-              </Text>
-            </View>
+            {size === "L" ? (
+              <SizeBox size="L" selected={true} />
+            ) : (
+              <SizeBox size="L" selected={false} />
+            )}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setSize("XL")}>
-            <View
-              className="p-2 mr-2"
-              style={{
-                borderWidth: 1,
-                borderColor: "black",
-                backgroundColor: size == "XL" ? "black" : "white",
-              }}
-            >
-              <Text
-                className="text-center"
-                style={{ color: size == "XL" ? "white" : "black" }}
-              >
-                XL
-              </Text>
-            </View>
+            {size === "XL" ? (
+              <SizeBox size="XL" selected={true} />
+            ) : (
+              <SizeBox size="XL" selected={false} />
+            )}
           </TouchableOpacity>
+        </SizeContainer>
+        <View>
+          <AddToCartButton onPress={() => addToCart(item)} />
         </View>
-
-        <TouchableOpacity
-          onPress={() => addToCart(item)}
-          className="bg-black p-5 m-10 w-60 self-center rounded-2xl"
-          style={{
-            backgroundColor: "black",
-          }}
-        >
-          <Text className="text-center" style={{ color: "white" }}>
-            Add to Cart
-          </Text>
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
