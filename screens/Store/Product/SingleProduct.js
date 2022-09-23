@@ -23,11 +23,11 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { DATA } from "../../BottomTabs/Explore";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { auth, db, getData } from "../../../database/Firebase";
+import { auth, db, getData } from "../../../external/Firebase";
 import Header from "../../Components/Header/Header";
 import { AntDesign } from "react-native-vector-icons";
 
-import { WooCommerce } from "../../../database/WoocommerceAPI";
+import { WooCommerce } from "../../../external/WoocommerceAPI";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -41,6 +41,7 @@ import AddToCartButton from "../../Components/SingleProduct/AddToCartButton";
 import DoubleClick from "react-native-double-tap";
 import SizeContainer from "../../Components/SingleProduct/SizeContainer";
 import SizeBox from "../../Components/SingleProduct/SizeBox";
+import { SERVER_URL } from "../../../external/API";
 
 const SingleProduct = ({ navigation, route }) => {
   const { productID, productName } = route.params;
@@ -54,37 +55,48 @@ const SingleProduct = ({ navigation, route }) => {
 
   useEffect(() => {
     fetchInfo();
-    getSignedInUser();
+
+    return () => {};
   }, []);
 
-  const fetchInfo = async () => {
-    WooCommerce.get("products", { per_page: 30 }).then((data) => {
-      for (let index = 0; index < data.length; index++) {
-        if (data[index].id === productID) {
-          setItem(data[index]);
-        }
-      }
-      console.log(item);
-    });
-  };
-
-  const getSignedInUser = () => {
+  const fetchInfo = () => {
     auth.onAuthStateChanged((user) => {
       if (user) {
         setUserID(user.uid);
+      } else {
+        fetch(SERVER_URL + "getProducts")
+          .then((data) => data.json())
+          .then((res) => {
+            for (let index = 0; index < res.Products.length; index++) {
+              if (res.Products[index].id === productID) {
+                // setItem(res.Products[index]);
+                setItem(res.Products[index]);
+                // setItem(res.Products[index]);
+              }
+            }
+          })
+          .catch((error) => console.log(error));
       }
     });
   };
 
   const addToCart = (data) => {
-    let images = data?.images[0]?.src;
+    // dispatch(
+    //   addToBasket({
+    //     id: data.id,
+    //     name: data.name,
+    //     image: images,
+    //     favourite: favourite,
+    //     size: size,
+    //     quantity: 1,
+    //     price: data.price,
+    //   })
 
     dispatch(
       addToBasket({
         id: data.id,
         name: data.name,
-        image: images,
-        favourite: favourite,
+        image: data.image,
         size: size,
         quantity: 1,
         price: data.price,
@@ -175,7 +187,7 @@ const SingleProduct = ({ navigation, route }) => {
             <TouchableOpacity>
               <Image
                 source={{
-                  uri: "",
+                  uri: item.image,
                 }}
                 style={{
                   width: Dimensions.get("screen").width,

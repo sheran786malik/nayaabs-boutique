@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { db } from "../database/Firebase";
+import { db } from "../external/Firebase";
 
 export const fireSlice = createSlice({
   name: "fireSlice",

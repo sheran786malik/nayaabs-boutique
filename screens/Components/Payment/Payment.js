@@ -16,9 +16,9 @@ import {
   useConfirmPayment,
 } from "@stripe/stripe-react-native";
 import React, { Component, useState, useEffect } from "react";
-import { WooCommerce } from "../../../database/WoocommerceAPI";
+import { WooCommerce } from "../../../external/WoocommerceAPI";
 import { useNavigation } from "@react-navigation/native";
-import { auth, db } from "../../../database/Firebase";
+import { auth, db } from "../../../external/Firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { clear_cart, selectCartTotal } from "../../../features/cartSlice";
 

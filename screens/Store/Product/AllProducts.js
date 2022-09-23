@@ -21,8 +21,10 @@ import {
   ArrowCircleRight,
 } from "react-native-heroicons/outline";
 import Card from "../../Components/Explore/Card";
-import { auth, db } from "../../../database/Firebase";
-import { WooCommerce } from "../../../database/WoocommerceAPI";
+import { auth, db } from "../../../external/Firebase";
+import { WooCommerce } from "../../../external/WoocommerceAPI";
+import { useDispatch, useSelector } from "react-redux";
+import { selectItem } from "../../../features/wishlistSlice";
 
 const AllProducts = ({ route, props }) => {
   const [data, setData] = useState([]);
@@ -31,7 +33,7 @@ const AllProducts = ({ route, props }) => {
   const [userID, setUserID] = useState("");
 
   const [favourite, setFavourite] = useState(false);
-
+  const dispatch = useDispatch();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -81,7 +83,11 @@ const AllProducts = ({ route, props }) => {
       .then(() => setFavourite(false), console.log("deleted from favourites!"));
   };
 
+  const isItemInWishlist = (item) => {};
   const renderAllProducts = ({ item }) => {
+    // if(dispatch(selectItem(item)) == -1){
+    //   favourite === false;
+    // }
     return (
       <Card>
         {favourite === false ? (
@@ -111,7 +117,7 @@ const AllProducts = ({ route, props }) => {
             source={{ uri: item.images[0].src }}
             style={{
               width: 100,
-              height: 100,
+              height: 200,
               resizeMode: "cover",
               margin: 8,
             }}

@@ -20,7 +20,7 @@ import {
 import tw from "tailwind-react-native-classnames";
 
 import { AntDesign } from "react-native-vector-icons";
-import { auth } from "../../database/Firebase";
+import { auth } from "../../external/Firebase";
 import { useNavigation } from "@react-navigation/native";
 
 const NotLoggedIn = () => {

@@ -18,7 +18,7 @@ import {
 } from "react-native-heroicons/outline";
 
 import { AntDesign } from "react-native-vector-icons";
-import { auth } from "../../database/Firebase";
+import { auth } from "../../external/Firebase";
 import { useNavigation, NavigationActions } from "@react-navigation/native";
 
 const CheckoutLogin = () => {

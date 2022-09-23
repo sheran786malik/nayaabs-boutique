@@ -25,7 +25,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import SlidingUpPanel from "rn-sliding-up-panel";
 import { AntDesign } from "react-native-vector-icons";
-import { auth, db } from "../../database/Firebase";
+import { auth, db } from "../../external/Firebase";
 
 import Header from "../Components/Header/Header";
 import Tabs from "../Components/Explore/Tabs";
@@ -34,11 +34,12 @@ import CardItem from "../Components/Explore/Card";
 import Card from "../Components/Explore/Card";
 
 import WooCommerceAPI from "react-native-woocommerce-api";
-import { getAllProducts, WooCommerce } from "../../database/WoocommerceAPI";
+import { getAllProducts, WooCommerce } from "../../external/WoocommerceAPI";
 
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 import ListOfClothes from "../Components/Explore/ListOfClothes";
 import { List } from "react-native-paper";
+import { SERVER_URL } from "../../external/API";
 
 // export const DATA = [{
 //     "id": 1,
@@ -117,37 +118,52 @@ export default class Explore extends Component {
     this.fetchInfo();
   }
   fetchInfo = async () => {
-    let productList = [];
-
-    WooCommerce.get("products", { per_page: 25 })
-      .then((data) => {
-        this.setState({ data: data, filteredProducts: data });
-      })
-      .then((data) => {
-        let readyToWearList = [];
-        let casualList = [];
-        for (let index = 0; index < this.state.data.length; index++) {
-          if (this.state.data[index].categories[0].name == "Ready to Wear") {
-            casualList.push(this.state.data[index]);
-          } else if (
-            this.state.data[index].categories[0].name == "Unstitched"
-          ) {
-            readyToWearList.push(this.state.data[index]);
-          }
-          this.setState({
-            readyToWearList: readyToWearList,
-            casualList: casualList,
-          });
-        }
-      });
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        let productList = [];
+        fetch(SERVER_URL + "getProducts")
+          .then((data) => data.json())
+          .then((res) => {
+            this.setState({
+              data: res.Products,
+              filteredProducts: res.Products,
+            });
+            this.filterData(res.Products);
+          })
+          .then((data) => {});
+      } else {
+        fetch(SERVER_URL + "getProductsForUser?userID=" + user.uid)
+          .then((res) => res.json())
+          .then((data) => {
+            this.filterData(data.Products);
+            this.setState({ user: user.uid });
+          })
+          .catch((error) => console.log(error));
+      }
+    });
   };
   // }
   goToProduct(product) {
     this.props.navigation.navigate("Product");
     AsyncStorage.setItem("product", JSON.stringify(product));
     this.props.navigation.navigate("Product");
-    console.log(product);
   }
+
+  filterData = (data) => {
+    let readyToWearList = [];
+    let casualList = [];
+    for (let index = 0; index < data.length; index++) {
+      if (data[index].category === "Casual") {
+        casualList.push(data[index]);
+      } else if (data[index].category === "Unstitched") {
+        readyToWearList.push(data[index]);
+      }
+      this.setState({
+        readyToWearList: readyToWearList,
+        casualList: casualList,
+      });
+    }
+  };
 
   searchProducts(product) {
     this.setState({ searchActivated: true });
@@ -163,88 +179,7 @@ export default class Explore extends Component {
     }
   }
 
-  like = (item) => {
-    console.log("like");
-  };
-
-  dislike = (item) => {
-    console.log("dislike");
-  };
   render() {
-    const renderItem = ({ item }) => (
-      <View className="bg-grey m-2 rounded-md">
-        <Item
-          id={item.id}
-          title={item.title}
-          quantity={item.quantity}
-          favourite={item.favourite}
-          size={item.size}
-          category={item.category}
-          image={item.image}
-          price={item.price}
-          description={item.description}
-        />
-      </View>
-    );
-
-    const Item = ({
-      id,
-      name,
-      image,
-      price,
-      description,
-      quantity,
-      size,
-      favourite,
-    }) => (
-      <Card>
-        <TouchableOpacity
-          onPress={() =>
-            this.props.navigation.navigate("Product", {
-              productID: id,
-            })
-          }
-        >
-          {favourite ? (
-            <AntDesign
-              style={{ zIndex: 999, position: "absolute", right: 10, top: 10 }}
-              name="heart"
-              size={30}
-              color="black"
-            />
-          ) : (
-            <AntDesign
-              style={{ zIndex: 999, position: "absolute", right: 10, top: 10 }}
-              name="hearto"
-              size={30}
-              color="black"
-            />
-          )}
-
-          <Image
-            className="w-full p-10"
-            style={{
-              resizeMode: "contain",
-              height: Dimensions.get("screen").height / 4,
-            }}
-            source={{ uri: image }}
-          />
-
-          <View className="flex-row justify-between p-3 space-x-4">
-            <Text
-              className="self-end w-32"
-              style={{ fontSize: 18, textAlign: "left" }}
-            >
-              {name}
-            </Text>
-            <Text className="font-bold" style={{ fontSize: 20 }}>
-              {price}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </Card>
-    );
-
     return (
       <View style={styles.container}>
         <ScrollView>
@@ -331,18 +266,19 @@ export default class Explore extends Component {
                 </View>
               </View>
 
-              {this.state.casualList &&
-              this.state.readyToWearList &&
-              this.state.data ? (
+              {this.state.user.length > 2 ? (
+                <ListOfClothes
+                  selected={this.state.selected}
+                  casualList={this.state.casualList}
+                  readyToWearList={this.state.readyToWearList}
+                  user={this.state.user}
+                />
+              ) : (
                 <ListOfClothes
                   selected={this.state.selected}
                   casualList={this.state.casualList}
                   readyToWearList={this.state.readyToWearList}
                 />
-              ) : (
-                <View>
-                  <ActivityIndicator size={"large"} color="black" />
-                </View>
               )}
             </View>
           </View>

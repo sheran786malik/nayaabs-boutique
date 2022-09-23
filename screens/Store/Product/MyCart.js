@@ -35,7 +35,7 @@ import {
 } from "../../../features/cartSlice";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import { auth } from "../../../database/Firebase";
+import { auth } from "../../../external/Firebase";
 
 const MyCart = () => {
   const items = useSelector(selectCartItems);

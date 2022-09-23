@@ -44,7 +44,7 @@ import Register from "./screens/notLoggedIn/Register";
 import Explore from "./screens/BottomTabs/Explore";
 import CheckoutLogin from "./screens/notLoggedIn/CheckoutLogin";
 import MyOrders from "./screens/Store/Orders/MyOrders";
-import { auth } from "./database/Firebase";
+import { auth } from "./external/Firebase";
 import myDetails from "./screens/loggedIn/myDetails";
 import MyDetails from "./screens/loggedIn/myDetails";
 import { Provider } from "react-redux";

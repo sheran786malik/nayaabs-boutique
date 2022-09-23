@@ -11,11 +11,11 @@ import React, { Component, useState, useEffect } from "react";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import Header from "../../Components/Header/Header";
 import NoOrders from "../../Components/Profile/NoOrders";
-import { auth, db } from "../../../database/Firebase";
+import { auth, db } from "../../../external/Firebase";
 import { useNavigation } from "@react-navigation/native";
 
 import Swipeout from "react-native-swipeout";
-import { WooCommerce } from "../../../database/WoocommerceAPI";
+import { WooCommerce } from "../../../external/WoocommerceAPI";
 
 import Card from "../../Components/Explore/Card";
 import { HeartIcon } from "react-native-heroicons/outline";
@@ -43,7 +43,7 @@ const MyOrders = () => {
           .collection("orders")
           .get()
           .then((data) =>
-            data.forEach((dat) => console.log(setOrders(dat.data().cartItems)))
+            data.forEach((dat) => setOrders(dat.data().cartItems))
           );
       } else {
       }
@@ -64,7 +64,7 @@ const MyOrders = () => {
     return (
       <Swipeout right={swipeoutBtns} style={{}}>
         <View className="p-5">
-          <View className="flex flex-row ">
+          <View className="flex flex-row">
             <View className="flex flex-col">
               <Image
                 source={{ uri: "" }}
@@ -77,7 +77,7 @@ const MyOrders = () => {
               <Text className="">{item.id}</Text>
               <Text className="w-52">{item.name}</Text>
               <Text className="font-bold mt-3"> £{item.price}</Text>
-              <Text className=" font-bold mt-3"> £{item.size}</Text>
+              <Text className=" font-bold mt-3"> {item.size}</Text>
             </View>
           </View>
         </View>

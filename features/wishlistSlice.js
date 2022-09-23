@@ -24,4 +24,7 @@ export const { add, deleteWish } = wishlistSlice.actions;
 
 export const selectAll = (state) => state.wishlist;
 
+export const selectItem = (state, payload) =>
+  state.findIndex((data) => data.id === payload.id);
+
 export default wishlistSlice.reducer;

@@ -33,8 +33,8 @@ import {
   useConfirmPayment,
 } from "@stripe/stripe-react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { db } from "../../database/Firebase";
-import { WooCommerce } from "../../database/WoocommerceAPI";
+import { db } from "../../external/Firebase";
+import { WooCommerce } from "../../external/WoocommerceAPI";
 import { Payment } from "../Components/Payment/Payment";
 import { add } from "react-native-reanimated";
 import { useSelector } from "react-redux";

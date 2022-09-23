@@ -15,7 +15,7 @@ import {
 } from "react-native-heroicons/outline";
 import { PaymentIcon } from "react-native-payment-icons";
 import Header from "../Components/Header/Header";
-import { auth, db } from "../../database/Firebase";
+import { auth, db } from "../../external/Firebase";
 import {
   CardField,
   StripeProvider,
@@ -23,7 +23,7 @@ import {
   useConfirmPayment,
 } from "@stripe/stripe-react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { WooCommerce } from "../../database/WoocommerceAPI";
+import { WooCommerce } from "../../external/WoocommerceAPI";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SwipeButton from "rn-swipe-button";

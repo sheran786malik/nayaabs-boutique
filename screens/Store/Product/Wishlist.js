@@ -22,7 +22,7 @@ import { DATA } from "../../BottomTabs/Explore";
 
 import { AntDesign } from "react-native-vector-icons";
 import Header from "../../Components/Header/Header";
-import { auth, db } from "../../../database/Firebase";
+import { auth, db } from "../../../external/Firebase";
 
 import { useNavigation } from "@react-navigation/native";
 
@@ -31,9 +31,10 @@ import AddToCartButton from "../../Components/SingleProduct/AddToCartButton";
 
 import { useDispatch } from "react-redux";
 import { addToBasket } from "../../../features/cartSlice";
+import { SERVER_URL } from "../../../external/API";
 
 const Wishlist = () => {
-  const [Data, setData] = useState([]);
+  const [data, setData] = useState([]);
   const [userID, setUserID] = useState("");
 
   const navigation = useNavigation();
@@ -41,24 +42,21 @@ const Wishlist = () => {
 
   useEffect(() => {
     getInformation();
-    getData();
     return () => {};
   }, []);
 
-  const getInformation = () => {
+  const getInformation = async () => {
     auth.onAuthStateChanged((user) => {
       if (user) {
         setUserID(user.uid);
+        fetch(SERVER_URL + "getWishlist?userID=" + user.uid)
+          .then((res) => res.json())
+          .then((data) => setData(data))
+          .catch((error) => console.log(error));
       } else {
         setUserID(null);
       }
     });
-  };
-
-  const getData = async () => {
-    fetch("https://dummyjson.com/products")
-      .then((data) => data.json())
-      .then((data) => setData(data.products));
   };
 
   const renderAllProducts = ({ item }) => {
@@ -66,18 +64,39 @@ const Wishlist = () => {
       <Card>
         <View className="flex flex-col ">
           <Image
-            source={{ uri: item.images[0] }}
+            source={{ uri: item.image }}
             style={{ width: 100, height: 100, border: 1 }}
             className="self-center"
           />
-          <HeartIcon style={styles.close} size={25} />
+          {item.favourite ? (
+            <HeartIcon style={styles.close} size={40} color="red" />
+          ) : (
+            <HeartIcon style={styles.close} size={40} color="black" />
+          )}
 
-          <Text className="text-center">{item.title}</Text>
+          <Text className="text-center">{item.name}</Text>
+          <Text className="text-center">{item.description}</Text>
           <Text className="text-center font-bold mt-3"> £{item.price}</Text>
+          <TouchableOpacity>
+            <AddToCartButton
+              onPress={() =>
+                dispatch(
+                  addToBasket({
+                    id: item.id,
+                    name: item.name,
+                    image: item.image,
+                    quantity: 1,
+                    favourite: item.favourite,
+                  })
+                )
+              }
+            />
+          </TouchableOpacity>
         </View>
       </Card>
     );
   };
+  console.log(data);
   return (
     <SafeAreaView style={{ backgroundColor: "#FBFBFD", flex: 1 }}>
       <Header
@@ -85,14 +104,15 @@ const Wishlist = () => {
         title="My Wishlist"
         pageToGoBackTo={"Explore"}
       />
-
       {userID ? (
-        <FlatList
-          data={Data}
-          numColumns={2}
-          renderItem={renderAllProducts}
-          keyExtractor={(item) => item.id}
-        />
+        <View>
+          <FlatList
+            data={data}
+            numColumns={2}
+            renderItem={renderAllProducts}
+            keyExtractor={(item) => item.id}
+          />
+        </View>
       ) : (
         <View>
           <View className="justify-center items-center align-middle h-5/6">
