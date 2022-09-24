@@ -1,59 +1,98 @@
-import { FlatList, Image, View, Text, TouchableOpacity } from "react-native";
-import React from "react";
+import {
+  FlatList,
+  Dimensions,
+  Image,
+  View,
+  Text,
+  TouchableOpacity,
+  SnapshotViewIOS,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import Card from "./Card";
 import { AntDesign } from "react-native-vector-icons";
 
 import { useNavigation } from "@react-navigation/native";
 import { db } from "../../../external/Firebase";
+
+import AddToCartButton from "../../Components/SingleProduct/AddToCartButton";
+
 const ListOfClothes = ({
-  selected,
   casualList,
   readyToWearList,
+  selected,
   numColumns,
   filteredProducts,
   user,
 }) => {
-  const navigation = useNavigation();
+  const [info, setInfo] = useState([]);
 
-  const like = (item) => {
-    // db.collection("users").doc(user).collection("wishlist").doc(random).set({
-    //   id:item.id,
-    //   name:item.name,
-    // })
-
+  useEffect(() => {
     db.collection("users")
       .doc(user)
       .collection("products")
       .doc("0")
       .get()
       .then((data) => {
-        const info = data.data();
+        setInfo(data.data().productDetails.Products);
+      })
+      .then((response) => {});
+    return () => {};
+  }, []);
+
+  const navigation = useNavigation();
+
+  const like = (item) => {
+    const userID = user;
+    let newData = { ...info };
+    console.log(newData);
+
+    if (newData.length !== 0) {
+      let index = newData.productDetails.Products.findIndex((e) => {
+        return e.id === item.id;
       });
+      newData.productDetails.Products[index].favourite = true;
+
+      db.collection("users")
+        .doc(userID)
+        .collection("products")
+        .doc("0")
+        .set(newData)
+        .then((data) => console.log(item))
+        .catch((error) => console.log(error));
+    } else {
+      alert("An error has occured");
+    }
+
+    console.log(item);
   };
 
   const dislike = (item) => {
-    console.log("disiked");
+    const userID = user;
+    let newData = { ...info };
+    console.log(newData);
+    if (newData.length === 0 || newData == null) {
+      alert("An error has occured");
+    } else {
+      let index = newData.productDetails.Products.findIndex((e) => {
+        return e.id === item.id;
+      });
+      newData.productDetails.Products[index].favourite = false;
+
+      db.collection("users")
+        .doc(userID)
+        .collection("products")
+        .doc("0")
+        .set(newData)
+        .then((data) => console.log(data))
+        .catch((error) => console.log(error));
+    }
+
+    console.log(item);
   };
 
   const renderAllProductsForUser = ({ item }) => {
     return (
       <Card>
-        {item.favourite == -false ? (
-          <TouchableOpacity
-            onPress={() => like(item)}
-            style={{ zIndex: 999, position: "absolute", right: -20, top: 30 }}
-          >
-            <AntDesign name="heart" size={40} color="black" />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            onPress={() => dislike(item)}
-            style={{ zIndex: 999, position: "absolute", right: -20, top: 30 }}
-          >
-            <AntDesign name="hearto" size={40} color="black" />
-          </TouchableOpacity>
-        )}
-
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("Product", {
@@ -79,6 +118,39 @@ const ListOfClothes = ({
             <Text className="font-bold">{item.price}</Text>
           </View>
         </TouchableOpacity>
+        <Text className="text-black">{item.favourite ? "true" : "false"}</Text>
+        {/* {item.favourite ? (
+        <TouchableOpacity
+          className="bg-white self-center p-5 mt-5 border"
+          style={{}}
+          onPress={() => dislike(item)}
+        >
+          <Text className="text-black text-center font-bold ">
+            Added to Wishlist
+          </Text>
+        </TouchableOpacity>
+        ) : (
+        <TouchableOpacity
+          className="bg-white self-center p-5 mt-5 border"
+          style={{}}
+          onPress={() => like(item)}
+        >
+          <Text className="text-black text-center font-bold ">
+            Add to Wishlist
+          </Text>
+        </TouchableOpacity> */}
+        {/* <TouchableOpacity
+          className="bg-black p-5 self-center mb-4 mt-4"
+          onPress={() => {
+            item.favourite ? dislike(item) : like(item);
+          }}
+        >
+          {item.favourite ? (
+            <Text className="text-white">Dislike</Text>
+          ) : (
+            <Text className="text-white">Dislike</Text>
+          )}
+        </TouchableOpacity> */}
       </Card>
     );
   };
@@ -123,6 +195,15 @@ const ListOfClothes = ({
             </Text>
             <Text className="font-bold">{item.price}</Text>
           </View>
+
+          <TouchableOpacity
+            className="bg-black p-5 self-center mb-4 mt-4"
+            onPress={() => {
+              item.favourite ? dislike(item) : like(item);
+            }}
+          >
+            {item.favourite ? <Text>Dislike</Text> : <Text>Dislike</Text>}
+          </TouchableOpacity>
         </TouchableOpacity>
       </Card>
     );

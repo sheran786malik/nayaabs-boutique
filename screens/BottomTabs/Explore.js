@@ -111,7 +111,7 @@ export default class Explore extends Component {
 
     data: [],
 
-    user: [],
+    user: "",
   };
 
   componentDidMount() {

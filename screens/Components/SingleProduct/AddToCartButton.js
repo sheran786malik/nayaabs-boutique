@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import React from "react";
 
-const AddToCartButton = ({ onPress }) => {
+const AddToCartButton = ({ title, onPress }) => {
   return (
     <TouchableOpacity
       className="bg-black p-5 self-center mb-4 mt-4"

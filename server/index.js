@@ -159,7 +159,7 @@ app.get("/getWishlist", async (req, res) => {
 
 app.get("/getProducts", async (req, res) => {
   const productDetails = {};
-  const numberOfProducts = 25;
+  const numberOfProducts = 40;
   api
     .get("products", {
       per_page: numberOfProducts, // 20 products per page
