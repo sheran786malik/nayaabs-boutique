@@ -87,11 +87,20 @@ export default class App extends React.Component {
     loading: true,
     sender: "",
     loggedIn: false,
+    userID: false,
   };
   componentDidMount() {
     AsyncStorage.getItem("first_time").then((value) => {
       this.setState({ showRealApp: !!value, loading: false });
     });
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        this.setState({ userID: false });
+      } else {
+        this.setState({ userID: true });
+      }
+    });
+
     //   auth.onAuthStateChanged((user) => {
     //     if (user) {
     //       this.setState({loggedIn:true})
@@ -152,7 +161,7 @@ export default class App extends React.Component {
                 initialRouteName="Home"
                 activeColor="black"
                 barStyle={{ backgroundColor: "white" }}
-                screenOptions={{ headerShown: false, unmountOnBlur: true }}
+                screenOptions={{ headerShown: false }}
               >
                 <Tab.Screen
                   name="Home"
@@ -171,17 +180,17 @@ export default class App extends React.Component {
                     ),
                   }}
                 />
-                <Tab.Screen
+                {/* <Tab.Screen
                   name="Wishlist"
                   component={Wishlist}
                   options={{
                     tabBarLabel: "Wishlist",
                     tabBarIcon: () => <HeartIcon size={26} color="black" />,
                   }}
-                />
-                {user ? (
+                /> */}
+                {this.state.userID == true ? (
                   <Tab.Screen
-                    name="Me"
+                    name="LoggedIn"
                     component={LoggedInStack}
                     options={{
                       tabBarLabel: "Me",
@@ -191,7 +200,7 @@ export default class App extends React.Component {
                   />
                 ) : (
                   <Tab.Screen
-                    name="Me"
+                    name="LoggedOut"
                     component={NotLoggedInStack}
                     options={{
                       tabBarLabel: "Me",
@@ -236,17 +245,16 @@ function ExploreStack() {
         component={SingleProduct}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
         name="MyCart"
         component={MyCart}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="OrderConfirm"
         component={OrderConfirmation}
         options={{ headerShown: false }}
-      />
+      /> */}
       <Stack.Screen
         name="Settings"
         component={Settings}
@@ -255,6 +263,12 @@ function ExploreStack() {
       <Stack.Screen
         name="Notifications"
         component={Notifications}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="OrderConfirm"
+        component={OrderConfirmation}
         options={{ headerShown: false }}
       />
       <Stack.Screen
@@ -316,21 +330,7 @@ function NotLoggedInStack() {
         component={Register}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="Profile"
-        component={Profile}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="orders"
-        component={MyOrders}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="MyDetails"
-        component={MyDetails}
-        options={{ headerShown: false }}
-      />
+
       <Stack.Screen
         name="Checkout-not-logged-in"
         component={CheckoutNotLoggedIn}

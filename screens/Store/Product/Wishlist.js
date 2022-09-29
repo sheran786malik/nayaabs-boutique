@@ -34,69 +34,73 @@ import { addToBasket } from "../../../features/cartSlice";
 import { SERVER_URL } from "../../../external/API";
 
 const Wishlist = () => {
-  const [data, setData] = useState([]);
+  const [Data, setData] = useState([]);
   const [userID, setUserID] = useState("");
 
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    getInformation();
+    fetchInfo();
     return () => {};
   }, []);
 
-  const getInformation = async () => {
+  const fetchInfo = async () => {
     auth.onAuthStateChanged((user) => {
-      if (user) {
-        setUserID(user.uid);
-        fetch(SERVER_URL + "getWishlist?userID=" + user.uid)
-          .then((res) => res.json())
-          .then((data) => setData(data))
-          .catch((error) => console.log(error));
-      } else {
+      if (!user) {
         setUserID(null);
+        setData("Please Log In");
+      } else {
+        setUserID(user.uid);
+        db.collection("users")
+          .doc(user.uid)
+          .collection("products")
+          .doc("0")
+          .get()
+          .then((data) => {
+            setData(data.data().productDetails.Products);
+          });
       }
     });
   };
 
   const renderAllProducts = ({ item }) => {
     return (
-      <Card>
-        <View className="flex flex-col ">
-          <Image
-            source={{ uri: item.image }}
-            style={{ width: 100, height: 100, border: 1 }}
-            className="self-center"
-          />
-          {item.favourite ? (
-            <HeartIcon style={styles.close} size={40} color="red" />
-          ) : (
-            <HeartIcon style={styles.close} size={40} color="black" />
-          )}
+      <View>
+        {item.favourite ? (
+          <Card>
+            <View className="flex flex-col ">
+              <Image
+                source={{ uri: item.image }}
+                style={{ width: 100, height: 100, border: 1 }}
+                className="self-center"
+              />
 
-          <Text className="text-center">{item.name}</Text>
-          <Text className="text-center">{item.description}</Text>
-          <Text className="text-center font-bold mt-3"> £{item.price}</Text>
-          <TouchableOpacity>
-            <AddToCartButton
-              onPress={() =>
-                dispatch(
-                  addToBasket({
-                    id: item.id,
-                    name: item.name,
-                    image: item.image,
-                    quantity: 1,
-                    favourite: item.favourite,
-                  })
-                )
-              }
-            />
-          </TouchableOpacity>
-        </View>
-      </Card>
+              <Text className="text-center">{item.name}</Text>
+              <Text className="text-center">{item.description}</Text>
+              <Text className="text-center font-bold mt-3"> £{item.price}</Text>
+              <TouchableOpacity>
+                <AddToCartButton
+                  onPress={() =>
+                    dispatch(
+                      addToBasket({
+                        id: item.id,
+                        name: item.name,
+                        image: item.image,
+                        quantity: 1,
+                        favourite: item.favourite,
+                      })
+                    )
+                  }
+                />
+              </TouchableOpacity>
+            </View>
+          </Card>
+        ) : null}
+      </View>
     );
   };
-  console.log(data);
+  console.log(Data);
   return (
     <SafeAreaView style={{ backgroundColor: "#FBFBFD", flex: 1 }}>
       <Header
@@ -107,7 +111,7 @@ const Wishlist = () => {
       {userID ? (
         <View>
           <FlatList
-            data={data}
+            data={Data}
             numColumns={2}
             renderItem={renderAllProducts}
             keyExtractor={(item) => item.id}
@@ -138,7 +142,7 @@ const Wishlist = () => {
             <View>
               <TouchableOpacity
                 className="bg-black mt-10 p-5 w-52 self-center rounded-3xl"
-                onPress={() => navigation.navigate("Login")}
+                onPress={() => navigation.navigate("LoggedOut", {}, "Login")}
               >
                 <Text
                   className="text-center"
@@ -150,7 +154,7 @@ const Wishlist = () => {
 
               <TouchableOpacity
                 className="bg-black p-5 w-52  mt-5 self-center rounded-3xl"
-                onPress={() => navigation.navigate("Register")}
+                onPress={() => navigation.navigate("LoggedOut", {}, "Register")}
               >
                 <Text
                   className="text-center"

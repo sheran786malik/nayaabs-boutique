@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   Dimensions,
+  Button,
   FlatList,
   Platform,
   Image,
@@ -12,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { Component, useRef } from "react";
+import React, { Component, useRef, useEffect, useState } from "react";
 import {
   AdjustmentsIcon,
   ChevronLeftIcon,
@@ -22,7 +23,6 @@ import {
 } from "react-native-heroicons/outline";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import SlidingUpPanel from "rn-sliding-up-panel";
 import { AntDesign } from "react-native-vector-icons";
 import { auth, db } from "../../external/Firebase";
@@ -34,12 +34,14 @@ import CardItem from "../Components/Explore/Card";
 import Card from "../Components/Explore/Card";
 
 import WooCommerceAPI from "react-native-woocommerce-api";
-import { getAllProducts, WooCommerce } from "../../external/WoocommerceAPI";
-
-import SkeletonPlaceholder from "react-native-skeleton-placeholder";
+import {
+  getAllProducts,
+  getProducts,
+  WooCommerce,
+} from "../../external/WoocommerceAPI";
 import ListOfClothes from "../Components/Explore/ListOfClothes";
-import { List } from "react-native-paper";
 import { SERVER_URL } from "../../external/API";
+import { useNavigation } from "@react-navigation/native";
 
 // export const DATA = [{
 //     "id": 1,
@@ -93,253 +95,144 @@ import { SERVER_URL } from "../../external/API";
 //     "favourite": false,
 // }]
 
-export default class Explore extends Component {
-  constructor(props) {
-    super(props);
-  }
+const Explore = () => {
+  const [selected, setSelected] = useState("");
+  const [stitchedList, setStitchedList] = useState([]);
+  const [unstitchedList, setUnstitchedList] = useState([]);
+  const [seAll, setSeeAll] = useState(false);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [searchActivated, setSearchActivated] = useState(false);
+  const [data, setData] = useState([]);
+  const [userID, setUserID] = useState(false);
 
-  state = {
-    selectedButton: "",
-    casualList: [],
-    readyToWearList: [],
-    seeAll: false,
+  const [itemsAvailable, setItemsAvailable] = useState(false);
 
-    allProducts: [],
-    filteredProducts: [],
-    searchActivated: false,
-    selected: "",
+  const [panelVisible, setPanelVisible] = useState(false);
 
-    data: [],
+  const navigation = useNavigation();
 
-    user: "",
-  };
+  useEffect(() => {
+    // fetchInfo();
+    getProducts();
+    return () => {};
+  }, []);
 
-  componentDidMount() {
-    this.fetchInfo();
-  }
-  fetchInfo = async () => {
-    auth.onAuthStateChanged((user) => {
-      if (!user) {
-        let productList = [];
-        fetch(SERVER_URL + "getProducts")
-          .then((data) => data.json())
-          .then((res) => {
-            this.setState({
-              data: res.Products,
-              filteredProducts: res.Products,
-            });
-            this.filterData(res.Products);
-          })
-          .then((data) => {});
-      } else {
-        fetch(SERVER_URL + "getProductsForUser?userID=" + user.uid)
-          .then((res) => res.json())
-          .then((data) => {
-            this.filterData(data.Products);
-            this.setState({ user: user.uid });
-          })
-          .catch((error) => console.log(error));
-      }
-    });
-  };
-  // }
-  goToProduct(product) {
-    this.props.navigation.navigate("Product");
-    AsyncStorage.setItem("product", JSON.stringify(product));
-    this.props.navigation.navigate("Product");
-  }
+  // const getProducts = () => {
+  //   WooCommerce.get("products", { per_page: 30 })
+  //     .then((data) => {
+  //       let productList = [];
+  //       data.map((data) => {
+  //         productList.push({
+  //           id: data.id,
+  //           name: data.name,
+  //           image: data.images[0].src,
+  //           price: data.price,
+  //           category: data.categories[0].name,
+  //           description: data.description,
+  //         });
+  //         setUserID(null);
+  //         setData(productList);
+  //         setItemsAvailable(true);
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // };
 
-  filterData = (data) => {
-    let readyToWearList = [];
-    let casualList = [];
-    for (let index = 0; index < data.length; index++) {
-      if (data[index].category === "Casual") {
-        casualList.push(data[index]);
-      } else if (data[index].category === "Unstitched") {
-        readyToWearList.push(data[index]);
-      }
-      this.setState({
-        readyToWearList: readyToWearList,
-        casualList: casualList,
-      });
-    }
-  };
+  return (
+    <View style={styles.container}>
+      <ScrollView>
+        <View className="flex-row justify-end w-100 p-4">
+          <Header explore={true} navigation={navigation} />
+        </View>
+        <View className="flex-1">
+          <Text className="font-semibold p-5" style={{ fontSize: 30 }}>
+            Explore
+          </Text>
+          <Text className="font-400 p-5" style={{ color: "lightgray" }}>
+            Best suits for you
+          </Text>
 
-  searchProducts(product) {
-    this.setState({ searchActivated: true });
-    if (product) {
-      const newData = this.state.data.filter((item) => {
-        const itemData = item.name ? item.name.toUpperCase() : "".toUpperCase();
-        const textData = product.toUpperCase();
-        return itemData.indexOf(textData) > -1;
-      });
-      this.setState({ filteredProducts: newData });
-    } else {
-      this.setState({ filteredProducts: this.state.data });
-    }
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <ScrollView>
-          <View className="flex-row justify-end w-100 p-4">
-            <Header explore={true} navigation={this.props.navigation} />
-          </View>
-          <View className="flex-1">
-            <Text className="font-semibold p-5" style={{ fontSize: 30 }}>
-              Explore
-            </Text>
-            <Text className="font-400 p-5" style={{ color: "lightgray" }}>
-              Best suits for you
-            </Text>
-
-            <View>
-              <Tabs>
-                <TouchableOpacity
-                  className="p-6 rounded-2xl w-36 mr-3"
-                  onPress={() => this.setState({ selected: "Stitched" })}
+          <View>
+            <Tabs>
+              <TouchableOpacity
+                className="p-6 rounded-2xl w-36 mr-3"
+                onPress={() => setSelected("Stitched")}
+                style={{
+                  borderWidth: 1,
+                  borderColor: "black",
+                  backgroundColor: selected === "Stitched" ? "black" : "white",
+                }}
+              >
+                <Text
+                  className="text-center"
                   style={{
-                    borderWidth: 1,
-                    borderColor: "black",
-                    backgroundColor:
-                      this.state.selected === "Stitched" ? "black" : "white",
+                    fontSize: 14,
+                    fontWeight: "bold",
+                    color: selected === "Stitched" ? "white" : "black",
                   }}
                 >
-                  <Text
-                    className="text-center"
-                    style={{
-                      fontSize: 14,
-                      fontWeight: "bold",
-                      color:
-                        this.state.selected === "Stitched" ? "white" : "black",
-                    }}
-                  >
-                    Stitched
-                  </Text>
-                </TouchableOpacity>
+                  Stitched
+                </Text>
+              </TouchableOpacity>
 
-                <TouchableOpacity
-                  className="p-6 rounded-2xl w-36"
-                  onPress={() => this.setState({ selected: "Unstitched" })}
+              <TouchableOpacity
+                className="p-6 rounded-2xl w-36"
+                onPress={() => setSelected("Unstitched")}
+                style={{
+                  borderWidth: 1,
+                  borderColor: "black",
+                  backgroundColor:
+                    selected === "Unstitched" ? "black" : "white",
+                }}
+              >
+                <Text
+                  className="text-center"
                   style={{
-                    borderWidth: 1,
-                    borderColor: "black",
-                    backgroundColor:
-                      this.state.selected === "Unstitched" ? "black" : "white",
+                    fontSize: 14,
+                    fontWeight: "bold",
+                    color: selected === "Unstitched" ? "white" : "black",
                   }}
                 >
-                  <Text
-                    className="text-center"
-                    style={{
-                      fontSize: 14,
-                      fontWeight: "bold",
-                      color:
-                        this.state.selected === "Unstitched"
-                          ? "white"
-                          : "black",
-                    }}
-                  >
-                    Unstitched
-                  </Text>
-                </TouchableOpacity>
-              </Tabs>
+                  Unstitched
+                </Text>
+              </TouchableOpacity>
+            </Tabs>
 
-              <View className="flex-row justify-between">
-                <View className="self-center">
-                  <Text
-                    className="font-semibold self-center p-2"
-                    style={{ fontSize: 20 }}
-                  >
-                    New Arrivals
-                  </Text>
-                </View>
-                <View className="self-center">
-                  <TouchableOpacity onPress={() => this._panel.show()}>
-                    <Text
-                      className="font-light self-center p-2"
-                      style={{ fontSize: 15 }}
-                    >
-                      See All
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+            <View className="flex-row justify-between">
+              <View className="self-center">
+                <Text
+                  className="font-semibold self-center p-2"
+                  style={{ fontSize: 20 }}
+                >
+                  New Arrivals
+                </Text>
               </View>
-
-              {this.state.user.length > 2 ? (
-                <ListOfClothes
-                  selected={this.state.selected}
-                  casualList={this.state.casualList}
-                  readyToWearList={this.state.readyToWearList}
-                  user={this.state.user}
-                />
-              ) : (
-                <ListOfClothes
-                  selected={this.state.selected}
-                  casualList={this.state.casualList}
-                  readyToWearList={this.state.readyToWearList}
-                />
-              )}
-            </View>
-          </View>
-        </ScrollView>
-        <SlidingUpPanel ref={(c) => (this._panel = c)}>
-          {(dragHandler) => (
-            <SafeAreaView style={styles.container}>
-              <View style={{ marginTop: 50 }} />
-
-              <SafeAreaView className="self-center">
-                <View className="flex-row justify-between w-60 p-4">
-                  <TouchableOpacity onPress={() => this._panel.hide()}>
-                    <ChevronLeftIcon className="" size={30} color="black" />
-                  </TouchableOpacity>
+              <View className="self-center">
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("AllProducts")}
+                >
                   <Text
-                    className="self-center"
-                    style={{ fontWeight: "600", fontSize: 20 }}
+                    className="font-light self-center p-2"
+                    style={{ fontSize: 15 }}
                   >
-                    All Clothing{" "}
+                    See All
                   </Text>
-                </View>
-                <SearchBox>
-                  <View className="flex-row self-center">
-                    <SearchIcon size={25} color="darkgrey" />
-                    <TextInput
-                      placeholder="Search Items"
-                      style={{
-                        color: "darkgrey",
-                        fontWeight: "500",
-                        opacity: 0.5,
-                        fontSize: 20,
-                      }}
-                      onFocus={() => this.setState({ searchActivated: true })}
-                      onBlur={() => this.setState({ searchActivated: false })}
-                      onChangeText={(item) => this.searchProducts(item)}
-                    />
-                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
 
-                  {/* <TouchableOpacity className='bg-black p-2 rounded-xl'>
-                                        <AdjustmentsIcon style={{ transform: [{ rotate: '90deg' }] }} size={20} color='white' className='self-center' />
-
-                                    </TouchableOpacity> */}
-                </SearchBox>
-
-                {/* <FlatList
-                                    numColumns={2}
-                                    data={this.state.filteredProducts}
-                                    renderItem={renderAllProducts}
-                                /> */}
-                <ListOfClothes
-                  filteredProducts={this.state.filteredProducts}
-                  numColumns={2}
-                />
-              </SafeAreaView>
-            </SafeAreaView>
-          )}
-        </SlidingUpPanel>
-      </View>
-    );
-  }
-}
+            <ListOfClothes
+              selected={selected}
+              //  data={data}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
 
 const styles = {
   container: {
@@ -350,3 +243,5 @@ const styles = {
     top: 20,
   },
 };
+
+export default Explore;

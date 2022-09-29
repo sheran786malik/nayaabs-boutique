@@ -1,255 +1,173 @@
 import {
-  FlatList,
   Dimensions,
+  FlatList,
   Image,
   View,
   Text,
   TouchableOpacity,
-  SnapshotViewIOS,
+  ActivityIndicator,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Card from "./Card";
 import { AntDesign } from "react-native-vector-icons";
 
 import { useNavigation } from "@react-navigation/native";
 import { db } from "../../../external/Firebase";
+import AddToCartButton from "../SingleProduct/AddToCartButton";
+import { useDispatch, useSelector } from "react-redux";
+import { addToBasket } from "../../../features/cartSlice";
+import { WooCommerce } from "../../../external/WoocommerceAPI";
+import { addToStock, showStock } from "../../../features/stockSlice";
 
-import AddToCartButton from "../../Components/SingleProduct/AddToCartButton";
+const ListOfClothes = ({ selected }) => {
+  const navigation = useNavigation();
 
-const ListOfClothes = ({
-  casualList,
-  readyToWearList,
-  selected,
-  numColumns,
-  filteredProducts,
-  user,
-}) => {
-  const [info, setInfo] = useState([]);
+  const [info, setInfo] = useState("");
+  // const info = useSelector(showStock);
 
-  useEffect(() => {
-    db.collection("users")
-      .doc(user)
-      .collection("products")
-      .doc("0")
-      .get()
+  const [unstitchedList, setUnstitchedList] = useState([]);
+  const [stitchedList, setStitchedList] = useState([]);
+  const [itemsAvailable, setItemsAvailable] = useState(false);
+
+  const dispatch = useDispatch();
+
+  useEffect(async () => {
+    // const getProducts = () => {
+    await WooCommerce.get("products", { per_page: 30 })
       .then((data) => {
-        setInfo(data.data().productDetails.Products);
+        let productList = [];
+        data.map((data) => {
+          productList.push({
+            id: data.id,
+            name: data.name,
+            image: data.images[0].src,
+            price: data.price,
+            category: data.categories[0].name,
+            description: data.description,
+          });
+          // setUserID(null);
+        });
+        // dispatch(addToStock(productList));
+        setInfo(productList);
+        filterData(info);
+
+        setItemsAvailable(true);
       })
-      .then((response) => {});
+
+      .catch((error) => {
+        console.log(error);
+      });
+    // };
+    // filterData(info);
+
     return () => {};
   }, []);
 
-  const navigation = useNavigation();
-
-  const like = (item) => {
-    const userID = user;
-    let newData = { ...info };
-    console.log(newData);
-
-    if (newData.length !== 0) {
-      let index = newData.productDetails.Products.findIndex((e) => {
-        return e.id === item.id;
+  const filterData = (information) => {
+    let stitchedList = [];
+    let unstitchedList = [];
+    if (information !== null || information.length !== 0) {
+      information.map((data) => {
+        if (data.category === "Ready to Wear") {
+          stitchedList.push(data);
+        } else if (data.category === "Unstitched") {
+          unstitchedList.push(data);
+        }
       });
-      newData.productDetails.Products[index].favourite = true;
-
-      db.collection("users")
-        .doc(userID)
-        .collection("products")
-        .doc("0")
-        .set(newData)
-        .then((data) => console.log(item))
-        .catch((error) => console.log(error));
-    } else {
-      alert("An error has occured");
     }
 
-    console.log(item);
-  };
-
-  const dislike = (item) => {
-    const userID = user;
-    let newData = { ...info };
-    console.log(newData);
-    if (newData.length === 0 || newData == null) {
-      alert("An error has occured");
-    } else {
-      let index = newData.productDetails.Products.findIndex((e) => {
-        return e.id === item.id;
-      });
-      newData.productDetails.Products[index].favourite = false;
-
-      db.collection("users")
-        .doc(userID)
-        .collection("products")
-        .doc("0")
-        .set(newData)
-        .then((data) => console.log(data))
-        .catch((error) => console.log(error));
-    }
-
-    console.log(item);
-  };
-
-  const renderAllProductsForUser = ({ item }) => {
-    return (
-      <Card>
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("Product", {
-              productID: item.id,
-            })
-          }
-        >
-          <Image
-            source={{ uri: item.image }}
-            style={{
-              width: 200,
-              height: 300,
-              resizeMode: "contain",
-              borderTopRightRadius: 20,
-              borderTopLeftRadius: 20,
-            }}
-          />
-
-          <View className="flex-row w-32 justify-between bg-dark">
-            <Text className="w-36" style={{ color: "black" }}>
-              {item.name}
-            </Text>
-            <Text className="font-bold">{item.price}</Text>
-          </View>
-        </TouchableOpacity>
-        <Text className="text-black">{item.favourite ? "true" : "false"}</Text>
-        {/* {item.favourite ? (
-        <TouchableOpacity
-          className="bg-white self-center p-5 mt-5 border"
-          style={{}}
-          onPress={() => dislike(item)}
-        >
-          <Text className="text-black text-center font-bold ">
-            Added to Wishlist
-          </Text>
-        </TouchableOpacity>
-        ) : (
-        <TouchableOpacity
-          className="bg-white self-center p-5 mt-5 border"
-          style={{}}
-          onPress={() => like(item)}
-        >
-          <Text className="text-black text-center font-bold ">
-            Add to Wishlist
-          </Text>
-        </TouchableOpacity> */}
-        {/* <TouchableOpacity
-          className="bg-black p-5 self-center mb-4 mt-4"
-          onPress={() => {
-            item.favourite ? dislike(item) : like(item);
-          }}
-        >
-          {item.favourite ? (
-            <Text className="text-white">Dislike</Text>
-          ) : (
-            <Text className="text-white">Dislike</Text>
-          )}
-        </TouchableOpacity> */}
-      </Card>
-    );
+    setStitchedList(stitchedList);
+    setUnstitchedList(unstitchedList);
   };
 
   const renderAllProducts = ({ item }) => {
     return (
       <Card>
-        {/* {item.favourite ?
-                    <TouchableOpacity onPress={() => this.like(item)}
-                        style={{ zIndex: 999, position: 'absolute', right: 10, top: 10 }} >
-                        <AntDesign name='heart' size={30} color='black' />
-                    </TouchableOpacity>
-                    :
-                    <TouchableOpacity onPress={() => this.dislike(item)}
-                        style={{ zIndex: 999, position: 'absolute', right: 10, top: 10 }} >
-                        <AntDesign name='hearto' size={30} color='black' />
-                    </TouchableOpacity>
-
-                } */}
-
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("Product", {
               productID: item.id,
+              productName: item.name,
+              productImage: item.image,
+              productDescription: item.description,
+              productCategory: item.category,
+              productPrice: item.price,
             })
           }
         >
           <Image
+            className="self-center"
             source={{ uri: item.image }}
             style={{
-              width: 200,
-              height: 300,
-              resizeMode: "contain",
-              borderTopRightRadius: 20,
-              borderTopLeftRadius: 20,
+              width: 150,
+              height: 200,
+              resizeMode: "cover",
             }}
           />
 
-          <View className="flex-row w-32 justify-between bg-dark">
-            <Text className="w-36" style={{ color: "black" }}>
+          <View className="flex-col bg-dark p-3">
+            <Text className="font-bold pt-3">£{item.price}</Text>
+            <Text className="pt-3" style={{ color: "grey", fontSize: 11 }}>
               {item.name}
             </Text>
-            <Text className="font-bold">{item.price}</Text>
           </View>
+          {item.category === "Unstitched" ? (
+            <TouchableOpacity
+              className="bg-black p-3 self-center rounded-xl"
+              onPress={() =>
+                dispatch(
+                  addToBasket({
+                    id: item.id,
+                    name: item.name,
+                    image: item.image,
+                    quantity: 1,
+                    price: item.price,
+                  })
+                )
+              }
+              style={{
+                width: 150,
+              }}
+            >
+              <Text className="text-white text-center font-bold  ">
+                Add to Cart
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+        </TouchableOpacity>
 
+        {/* {user !== null ? (
           <TouchableOpacity
-            className="bg-black p-5 self-center mb-4 mt-4"
+            className="bg-white p-2 border"
             onPress={() => {
-              item.favourite ? dislike(item) : like(item);
+              item.favourite ? dislikeMethod(item) : likeMethod(item);
             }}
           >
-            {item.favourite ? <Text>Dislike</Text> : <Text>Dislike</Text>}
+            <Text className="text-black text-center ">
+              {item.favourite === false
+                ? "Add to wishlist"
+                : "Delete from wishlist"}
+            </Text>
           </TouchableOpacity>
-        </TouchableOpacity>
+        ) : null} */}
       </Card>
     );
   };
 
-  if (user != " ") {
-    return (
-      <View className="rounded-sm">
-        {selected === "Stitched" ? (
-          <FlatList
-            data={casualList}
-            renderItem={renderAllProductsForUser}
-            keyExtractor={(item) => item.id}
-            horizontal={true}
-          />
-        ) : (
-          <FlatList
-            data={readyToWearList}
-            renderItem={renderAllProductsForUser}
-            keyExtractor={(item) => item.id}
-            horizontal={true}
-          />
-        )}
-      </View>
-    );
-  } else {
-    return (
-      <View className="rounded-sm">
-        {selected === "Stitched" ? (
-          <FlatList
-            data={casualList}
-            renderItem={renderAllProducts}
-            keyExtractor={(item) => item.id}
-            horizontal={true}
-          />
-        ) : (
-          <FlatList
-            data={readyToWearList}
-            renderItem={renderAllProducts}
-            keyExtractor={(item) => item.id}
-            horizontal={true}
-          />
-        )}
-      </View>
-    );
-  }
+  return (
+    <View>
+      {itemsAvailable ? (
+        <FlatList
+          data={selected === "Stitched" ? stitchedList : unstitchedList}
+          renderItem={renderAllProducts}
+          keyExtractor={(item) => item.id}
+          horizontal={true}
+        />
+      ) : (
+        <ActivityIndicator size={"large"} color="black" />
+      )}
+    </View>
+  );
 };
 
 export default ListOfClothes;

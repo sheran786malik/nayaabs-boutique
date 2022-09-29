@@ -7,7 +7,10 @@ import {
   SearchIcon,
   BellIcon,
 } from "react-native-heroicons/outline";
+import { useSelector } from "react-redux";
 import { BadgeForCart } from "../Explore/BadgeForCart";
+import { Avatar, Badge, Icon, withBadge } from "react-native-elements";
+import { selectCartItems } from "../../../features/cartSlice";
 
 const Header = ({
   pageToGoBackTo,
@@ -17,10 +20,18 @@ const Header = ({
   onPress,
   profile,
 }) => {
+  const numOfItems = useSelector(selectCartItems);
   if (explore == true) {
     return (
       <View style={{ backgroundColor: "white" }}>
         <TouchableOpacity onPress={() => navigation.navigate("MyCart")}>
+          {numOfItems.length === 0 ? null : (
+            <Badge
+              value={numOfItems.length}
+              status="success"
+              containerStyle={{ position: "absolute", top: -4, right: -4 }}
+            />
+          )}
           <ShoppingBagIcon className="" size={30} color="black" />
         </TouchableOpacity>
       </View>

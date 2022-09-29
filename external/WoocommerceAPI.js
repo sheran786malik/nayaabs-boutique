@@ -9,3 +9,24 @@ export const WooCommerce = new WooCommerceAPI({
   version: "wc/v3", // WooCommerce WP REST API version
   queryStringAuth: true,
 });
+
+export const getProducts = () => {
+  let productList = [];
+  WooCommerce.get("products", { per_page: 30 })
+    .then((data) => {
+      data.map((data) => {
+        productList.push({
+          id: data.id,
+          name: data.name,
+          image: data.images[0].src,
+          price: data.price,
+          category: data.categories[0].name,
+          description: data.description,
+        });
+        return productList;
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};

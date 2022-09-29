@@ -33,10 +33,10 @@ import { selectCartItems, selectCartTotal } from "../../features/cartSlice";
 
 const CheckoutLoggedIn = () => {
   const [homeIsChecked, setHomeIsChecked] = useState(false);
-  const deliveryFee = parseInt(3.95);
+  const [deliveryFee, setDeliveryFee] = useState(4);
 
   const [userData, setUserData] = useState([]);
-  const price = useSelector(selectCartTotal);
+  const totalPrice = useSelector(selectCartTotal);
   const cartItems = useSelector(selectCartItems);
 
   const navigation = useNavigation();
@@ -143,15 +143,18 @@ const CheckoutLoggedIn = () => {
           </View>
           <View className="flex-col p-4">
             <Text style={{ fontSize: 14, color: "lightgrey" }}>
-              {homeIsChecked ? deliveryFee : "FREE"}
+              £{deliveryFee}
             </Text>
             {/* <Text>{this.props.navigation.getParam('total')}</Text> */}
             <Text style={{ fontSize: 14, color: "lightgrey" }}>
-              {useSelector(selectCartTotal)}
+              £{totalPrice}
             </Text>
             <Text style={{ fontSize: 14, color: "lightgrey" }}>
-              {homeIsChecked ? parseInt(price) + deliveryFee : parseInt(price)}
+              £{totalPrice + deliveryFee}
             </Text>
+            {/* <Text style={{ fontSize: 14, color: "lightgrey" }}>
+              {homeIsChecked ? setDeliveryFee(3.95) : setDeliveryFee(0)}
+            </Text> */}
           </View>
         </View>
         <View>
@@ -171,7 +174,7 @@ const CheckoutLoggedIn = () => {
               email={userData.emailAddress}
               fullName={userData.fullName}
               address={userData.address}
-              totalPrice={useSelector(selectCartTotal)}
+              totalPrice={parseInt(totalPrice + deliveryFee)}
               cartItems={cartItems}
               phoneNumber={userData.phoneNo}
               delivery={homeIsChecked ? true : false}

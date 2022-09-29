@@ -6,7 +6,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import Header from "../Components/Header/Header";
 import Form from "../Components/MyDetails/Form";
 import DatePicker from "react-native-date-picker";
@@ -24,117 +24,150 @@ import {
   PhoneIcon,
 } from "react-native-heroicons/outline";
 import { auth, db } from "../../external/Firebase";
+import { useNavigation } from "@react-navigation/native";
 
-export default class MyDetails extends Component {
-  state = {
-    date: new Date(),
-    open: false,
-    userDetails: [],
+const MyDetails = () => {
+  // state = {
+  //   date: new Date(),
+  //   open: false,
+  //   userDetails: [],
 
-    emailAddress: "",
-    address: "",
-    phoneNo: "",
-    fullName: "",
-    userID: "",
-  };
+  //   emailAddress: "",
+  //   address: "",
+  //   phoneNo: "",
+  //   fullName: "",
+  //   userID: "",
+  // };
 
-  updateDetails() {
+  const [date, setDate] = useState("");
+  const [open, setOpen] = useState(false);
+  const [userDetails, setUserDetails] = useState([]);
+  const [fullName, setFullName] = useState("");
+  const [emailAddress, setEmailAddress] = useState("");
+  const [address, setAddress] = useState("");
+  const [phoneNo, setPhoneNo] = useState("");
+  const [userExists, setUserExists] = useState(false);
+  const [userID, setUserID] = useState("");
+
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    fetchInfo();
+    return () => {};
+  }, []);
+
+  const updateDetails = () => {
     db.collection("users")
-      .doc(this.state.userID)
+      .doc(userID)
       .set({
-        emailAddress: this.state.emailAddress,
-        address: this.state.address,
-        phoneNo: this.state.phoneNo,
-        fullName: this.state.fullName,
+        emailAddress: emailAddress,
+        address: address,
+        phoneNo: phoneNo,
+        fullName: fullName,
       })
       .then((data) => {
         alert("Changes have been made successfully");
-        this.props.navigation.navigate("MyDetails");
+        navigation.navigate("MyDetails");
       })
       .catch((error) => {
         alert("An error has occured");
       });
-  }
+  };
 
-  componentDidMount() {
+  const fetchInfo = () => {
     auth.onAuthStateChanged((user) => {
       if (user) {
-        this.setState({ userID: user.uid });
+        setUserID(user.uid);
         db.collection("users")
           .doc(user.uid)
           .get()
           .then((querySnapshot) => {
             let userDetails = [];
-            this.setState({
-              emailAddress: querySnapshot.data().emailAddress,
-              address: querySnapshot.data().address,
-              phoneNo: querySnapshot.data().phoneNo,
-              fullName: querySnapshot.data().fullName,
-            });
+            setEmailAddress(querySnapshot.data().emailAddress);
+            setAddress(querySnapshot.data().address);
+            setFullName(querySnapshot.data().fullName);
+            setPhoneNo(querySnapshot.data().phoneNo);
           });
       } else {
-        this.props.navigation.navigate("Login");
+        navigation.navigate("Login");
       }
     });
-  }
-  render() {
-    return (
-      <SafeAreaView>
-        <View className="bg-white">
-          <Header
-            title={"My Details"}
-            navigation={this.props.navigation}
-            pageToGoBackTo="Profile"
+  };
+
+  return (
+    <SafeAreaView className="flex-1 bg-white">
+      <Header
+        title={"My Details"}
+        navigation={navigation}
+        pageToGoBackTo="Profile"
+      />
+
+      <View className="flex flex-col mt-10 p-5 w-full h-1/2 justify-between">
+        <View className="flex flex-row justify-between text-center">
+          <Text className="text-sm text-gray-400 self-center">Name</Text>
+          <TextInput
+            placeholder="Enter Full Name"
+            className="text-base"
+            style={{
+              textDecorationLine: "underline",
+              textDecorationColor: "#ECECEC",
+            }}
+            value={fullName}
+            onChangeText={(e) => setUsername(e)}
           />
         </View>
 
-        <Form Icon={UserIcon} size="30">
+        <View className="flex flex-row justify-between text-center">
+          <Text className="text-sm text-gray-400 ">Email </Text>
           <TextInput
-            placeholder="Please enter name"
-            value={this.state.fullName}
-            onChangeText={(e) => this.setState({ fullName: e })}
+            className="text-base text-left"
+            placeholder="Enter Email Address"
+            style={{
+              textDecorationLine: "underline",
+              textDecorationColor: "#ECECEC",
+            }}
+            value={emailAddress}
+            onChangeText={(e) => setEmailAddress(e)}
           />
-        </Form>
+        </View>
 
-        <Form Icon={MailIcon} size="30">
+        <View className="flex-row justify-between">
+          <Text className="text-sm text-gray-400 self-center">Phone</Text>
           <TextInput
-            placeholder="Please enter email"
-            value={this.state.emailAddress}
-            onChangeText={(e) => this.setState({ emailAddress: e })}
+            className="text-base"
+            placeholder="Enter Phone Number"
+            style={{
+              textDecorationLine: "underline",
+              textDecorationColor: "#ECECEC",
+            }}
+            onChangeText={(e) => setPhoneNo(e)}
+            value={phoneNo}
           />
-        </Form>
+        </View>
 
-        <Form Icon={LocationMarkerIcon} size="30">
+        <View className="flex-row justify-between">
+          <Text className="text-sm text-gray-400 self-center">Address</Text>
           <TextInput
-            style={{ height: 45, fontFamily: "Ubunutu", width: "80%" }}
+            className="text-base"
+            placeholderTextColor={"black"}
             placeholder="Enter Address"
-            multiline={true}
-            editable={true}
-            numberOfLines={5}
-            value={this.state.address}
-            onChangeText={(e) => this.setState({ address: e })}
+            style={{
+              textDecorationLine: "underline",
+              textDecorationColor: "#ECECEC",
+            }}
+            onChangeText={(e) => setAddress(e)}
+            value={address}
           />
-        </Form>
-        <Form Icon={PhoneIcon} size="30">
-          <TextInput
-            placeholder="Please enter mobile number"
-            value={this.state.phoneNo}
-            onChangeText={(e) => this.setState({ phoneNo: e })}
-          />
-        </Form>
+        </View>
+      </View>
+      <TouchableOpacity
+        onPress={() => updateDetails()}
+        className="self-center p-5 w-80 mt-10 bg-black rounded-3xl"
+      >
+        <Text className="text-white text-center">Save Changes</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
+};
 
-        <TouchableOpacity
-          onPress={() => this.updateDetails()}
-          className="bg-black p-5 w-80 self-center rounded-3xl mt-5"
-        >
-          <Text
-            className="text-center"
-            style={{ color: "white", fontWeight: "600" }}
-          >
-            Save Changes
-          </Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  }
-}
+export default MyDetails;

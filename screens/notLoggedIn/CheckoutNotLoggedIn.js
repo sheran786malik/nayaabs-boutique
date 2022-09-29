@@ -10,7 +10,11 @@ import {
   View,
 } from "react-native";
 import React, { Component, useEffect, useState } from "react";
-import { MailIcon, LockOpenIcon } from "react-native-heroicons/outline";
+import {
+  MailIcon,
+  LockOpenIcon,
+  PencilIcon,
+} from "react-native-heroicons/outline";
 import {
   LocationMarkerIcon,
   PhoneIcon,
@@ -39,12 +43,14 @@ import { Payment } from "../Components/Payment/Payment";
 import { add } from "react-native-reanimated";
 import { useSelector } from "react-redux";
 import { selectCartItems, selectCartTotal } from "../../features/cartSlice";
+import { PaymentIcon } from "react-native-payment-icons";
 
 export default function CheckoutNotLoggedIn({ navigation }) {
   const [fullName, setFullName] = useState();
   const [address, setAddress] = useState();
   const [email, setEmail] = useState();
   const [phoneNumber, setPhoneNumber] = useState();
+  const [deliveryFee, setDeliveryFee] = useState(4);
 
   const [cardDetails, setCardDetails] = useState();
   const { confirmPayment, loading } = useConfirmPayment();
@@ -53,6 +59,7 @@ export default function CheckoutNotLoggedIn({ navigation }) {
 
   const [totalPrice, setTotalPrice] = useState(useSelector(selectCartTotal));
 
+  const [editing, setEditing] = useState("false");
   useEffect(() => {}, []);
 
   // pay = () => {
@@ -80,6 +87,10 @@ export default function CheckoutNotLoggedIn({ navigation }) {
       }
     );
     const { clientSecret, error } = await response.json();
+
+    if (error) {
+      alert("an error has occured");
+    }
 
     return { clientSecret, error };
   };
@@ -116,96 +127,89 @@ export default function CheckoutNotLoggedIn({ navigation }) {
           navigation={navigation}
         />
 
-        <View className="justify-around">
-          <Text className="p-3" style={{ fontWeight: "500", fontSize: 16 }}>
-            Full Name
-          </Text>
-
-          <View
-            className="w-80 self-center p-3"
-            style={{
-              backgroundColor: "white",
-            }}
-          >
-            <TextInput
-              placeholder="Name"
-              className="p-2"
-              onChangeText={(e) => setFullName(e)}
-            />
+        <View className="bg-white m-5 p-5">
+          <View className="flex-row justify-between">
+            <Text className="font-bold">Shipping Info</Text>
+            <TouchableOpacity onPress={() => setEditing(!editing)}>
+              <PencilIcon size={20} color="black" />
+            </TouchableOpacity>
           </View>
 
-          <Text className="p-3" style={{ fontWe: "500", fontSize: 16 }}>
-            Email Address
-          </Text>
-          <View
-            className="w-80 self-center p-3 mt-2"
-            style={{
-              backgroundColor: "white",
-            }}
-          >
-            <TextInput
-              placeholder="Email"
-              autoCapitalize={"none"}
-              className="p-2"
-              onChangeText={(e) => setEmail(e)}
-            />
+          <View className="flex-row justify-between mt-5">
+            <Text className="text-gray-500">Name</Text>
+            {editing ? (
+              <Text>{fullName}</Text>
+            ) : (
+              <TextInput
+                placeholder="Enter Full Name"
+                onChangeText={(e) => setFullName(e)}
+                value={fullName}
+              />
+            )}
           </View>
 
-          <Text className="p-3" style={{ fontWeight: "500", fontSize: 16 }}>
-            Address
-          </Text>
-
-          <View
-            className="w-80 self-center p-3 mt-2"
-            style={{
-              backgroundColor: "white",
-            }}
-          >
-            <TextInput
-              placeholder="Address"
-              className="p-2"
-              multiLine={true}
-              onChangeText={(e) => setAddress(e)}
-            />
+          <View className="flex-row justify-between mt-5">
+            <Text className="text-gray-500">Email</Text>
+            {editing ? (
+              <Text>{email}</Text>
+            ) : (
+              <TextInput
+                placeholder="Enter Email"
+                onChangeText={(e) => setEmail(e)}
+                value={email}
+              />
+            )}
           </View>
-
-          <Text className="p-3" style={{ fontWe: "500", fontSize: 16 }}>
-            Phone Number
-          </Text>
-
-          <View
-            className="w-80 self-center p-3 mt-2"
-            style={{
-              backgroundColor: "white",
-            }}
-          >
-            <TextInput
-              placeholder="Enter phone number"
-              className="p-2"
-              multiLine={true}
-              onChangeText={(e) => setPhoneNumber(e)}
-            />
+          <View className="flex-row justify-between mt-5">
+            <Text className="text-gray-500">Phone</Text>
+            {editing ? (
+              <Text>{phoneNumber}</Text>
+            ) : (
+              <TextInput
+                placeholder="Enter Phone"
+                onChangeText={(e) => setPhoneNumber(e)}
+                value={phoneNumber}
+              />
+            )}
           </View>
-
-          <View className="p-5">
-            <Text
-              className="self-center"
-              style={{ fontSize: 25, fontWeight: "500" }}
-            >
-              Total: {parseInt(totalPrice).toFixed(2)}
-            </Text>
+          <View className="flex-row justify-between mt-5">
+            <Text className="text-gray-500">Address</Text>
+            {editing ? (
+              <Text>{address}</Text>
+            ) : (
+              <TextInput
+                placeholder="Enter Address"
+                onChangeText={(e) => setAddress(e)}
+                value={address}
+              />
+            )}
           </View>
         </View>
 
-        <Payment
-          email={email}
-          fullName={fullName}
-          cardDetails={cardDetails}
-          address={address}
-          totalPrice={totalPrice}
-          cartItems={cartItems}
-          phoneNumber={phoneNumber}
-        />
+        <View className="p-5">
+          <View className="flex-row justify-between ">
+            <Text className="text-gray-500">Delivery Fee</Text>
+            <Text>£4</Text>
+          </View>
+
+          <View className="flex-row justify-between mt-5">
+            <Text className="text-gray-500">Total</Text>
+            <Text className="font-bold text-xl">
+              {parseInt(totalPrice + deliveryFee)}
+            </Text>
+          </View>
+        </View>
+        <View>
+          <Payment
+            email={email}
+            fullName={fullName}
+            cardDetails={cardDetails}
+            address={address}
+            totalPrice={parseInt(totalPrice + deliveryFee)}
+            cartItems={cartItems}
+            phoneNumber={phoneNumber}
+          />
+        </View>
       </KeyboardAwareScrollView>
     </SafeAreaView>
   );

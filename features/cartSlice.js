@@ -31,7 +31,8 @@ export const cartSlice = createSlice({
         (data) =>
           data.id === action.payload.id && data.size === action.payload.size
       );
-      state.cartItems.pop(item);
+      state.cartItems.splice(item, 1);
+      state.cartItems = [...state.cartItems]; // clone array
     },
     increaseQuantityOfItem: (state, { payload }) => {
       const item = state.cartItems.find(

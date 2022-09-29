@@ -44,14 +44,24 @@ import SizeBox from "../../Components/SingleProduct/SizeBox";
 import { SERVER_URL } from "../../../external/API";
 
 const SingleProduct = ({ navigation, route }) => {
-  const { productID, productName } = route.params;
   const [size, setSize] = useState("");
   const [favourite, setFavourite] = useState(false);
 
-  const [userID, setUserID] = useState("");
+  const [userID, setUserID] = useState(false);
   const [item, setItem] = useState([]);
 
+  const [itemsAvailable, setItemsAvailable] = useState(false);
+
   const dispatch = useDispatch();
+
+  const {
+    productName,
+    productImage,
+    productDescription,
+    productID,
+    productPrice,
+    productCategory,
+  } = route.params;
 
   useEffect(() => {
     fetchInfo();
@@ -59,26 +69,28 @@ const SingleProduct = ({ navigation, route }) => {
     return () => {};
   }, []);
 
-  const fetchInfo = () => {
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        setUserID(user.uid);
-      } else {
-        fetch(SERVER_URL + "getProducts")
-          .then((data) => data.json())
-          .then((res) => {
-            for (let index = 0; index < res.Products.length; index++) {
-              if (res.Products[index].id === productID) {
-                // setItem(res.Products[index]);
-                setItem(res.Products[index]);
-                // setItem(res.Products[index]);
-              }
-            }
-          })
-          .catch((error) => console.log(error));
-      }
-    });
-  };
+  // const fetchInfo = () => {
+  //   auth.onAuthStateChanged((user) => {
+  //     if (user) {
+  //       setUserID(user.uid);
+  //     } else {
+  //       fetch(SERVER_URL + "getProducts")
+  //         .then((data) => data.json())
+  //         .then((res) => {
+  //           setItemsAvailable(true);
+  //           for (let index = 0; index < res.Products.length; index++) {
+  //             if (res.Products[index].id === productID) {
+  //               // setItem(res.Products[index]);
+  //               setItem(res.Products[index]);
+
+  //               // setItem(res.Products[index]);
+  //             }
+  //           }
+  //         })
+  //         .catch((error) => console.log(error));
+  //     }
+  //   });
+  // };
 
   const addToCart = (data) => {
     // dispatch(
@@ -94,61 +106,30 @@ const SingleProduct = ({ navigation, route }) => {
 
     dispatch(
       addToBasket({
-        id: data.id,
-        name: data.name,
-        image: data.image,
+        id: productID,
+        name: productName,
+        image: productImage,
         size: size,
         quantity: 1,
-        price: data.price,
+        price: productPrice,
       })
     );
+
     navigation.navigate("MyCart");
   };
 
-  // const addToCart = async (data) => {
+  const fetchInfo = () => {
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUserID(true);
+      } else {
+        setUserID(false);
+      }
+    });
+    let product = [];
 
-  //     let itemArray = await AsyncStorage.getItem('cartItems')
-  //     itemArray = JSON.parse(itemArray)
-
-  //     if (itemArray === null || itemArray.length === 0) {
-
-  //         let cartItems = [];
-  //         cartItems.push({
-  //             id: data.id,
-  //             quantity: 1,
-  //             image: data.images[0].src,
-  //             title: data.name,
-  //             size: size,
-  //             price: data.price,
-  //             favourite: data.favourite,
-  //         })
-
-  //         try {
-  //             await AsyncStorage.setItem('cartItems', JSON.stringify(cartItems));
-  //             alert(
-  //                 'Item Added Successfully to cart'
-  //             );
-  //             navigation.navigate('MyCart');
-  //         } catch (error) {
-  //             return error;
-  //         }
-  //     } else {
-  //         const place = itemArray.findIndex(res => res.id = data.id)
-
-  //         let cartItems = itemArray
-  //         cartItems[place].quantity += 1;
-
-  //         try {
-  //             await AsyncStorage.setItem('cartItems', JSON.stringify(cartItems));
-  //             alert(
-  //                 'Item Added Successfully to cart'
-  //             );
-  //             navigation.navigate('MyCart');
-  //         } catch (error) {
-  //             return error;
-  //         }
-  //     }
-  // }
+    setItemsAvailable(true);
+  };
 
   const addToFavourites = (item) => {
     const randomNumber = Math.floor(Math.random()).toString();
@@ -175,71 +156,84 @@ const SingleProduct = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View className="bg-gray-300">
-        <View>
-          <DoubleClick
-            singleTap={() => {
-              console.log("single tap");
-            }}
-            doubleTap={() => {}}
-            delay={200}
-          >
+      <ScrollView>
+        <Header
+          pageToGoBackTo={"Explore"}
+          navigation={navigation}
+          title={productName}
+        />
+        {itemsAvailable ? (
+          <View>
             <TouchableOpacity>
               <Image
                 source={{
-                  uri: item.image,
+                  uri: productImage,
                 }}
                 style={{
                   width: Dimensions.get("screen").width,
-                  resizeMode: "contain",
-                  height: Dimensions.get("screen").height / 2.1,
+                  resizeMode: "repeat",
+                  height: Dimensions.get("screen").height / 3,
                 }}
               />
             </TouchableOpacity>
-          </DoubleClick>
-        </View>
-        <ProductListing data={item} />
-        <SizeContainer>
-          <TouchableOpacity onPress={() => setSize("XS")}>
-            {size === "XS" ? (
-              <SizeBox size="XS" selected={true} />
-            ) : (
-              <SizeBox size="XS" selected={false} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSize("S")}>
-            {size === "S" ? (
-              <SizeBox size="S" selected={true} />
-            ) : (
-              <SizeBox size="S" selected={false} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSize("M")}>
-            {size === "M" ? (
-              <SizeBox size="M" selected={true} />
-            ) : (
-              <SizeBox size="M" selected={false} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSize("L")}>
-            {size === "L" ? (
-              <SizeBox size="L" selected={true} />
-            ) : (
-              <SizeBox size="L" selected={false} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setSize("XL")}>
-            {size === "XL" ? (
-              <SizeBox size="XL" selected={true} />
-            ) : (
-              <SizeBox size="XL" selected={false} />
-            )}
-          </TouchableOpacity>
-        </SizeContainer>
-        <View>
-          <AddToCartButton onPress={() => addToCart(item)} />
-        </View>
-      </View>
+
+            <ProductListing
+              name={productName}
+              price={productPrice}
+              description={productDescription}
+            />
+
+            {productCategory === "Ready to Wear" ? (
+              <SizeContainer>
+                <TouchableOpacity onPress={() => setSize("XS")}>
+                  {size === "XS" ? (
+                    <SizeBox size="XS" selected={true} />
+                  ) : (
+                    <SizeBox size="XS" selected={false} />
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setSize("S")}>
+                  {size === "S" ? (
+                    <SizeBox size="S" selected={true} />
+                  ) : (
+                    <SizeBox size="S" selected={false} />
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setSize("M")}>
+                  {size === "M" ? (
+                    <SizeBox size="M" selected={true} />
+                  ) : (
+                    <SizeBox size="M" selected={false} />
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setSize("L")}>
+                  {size === "L" ? (
+                    <SizeBox size="L" selected={true} />
+                  ) : (
+                    <SizeBox size="L" selected={false} />
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setSize("XL")}>
+                  {size === "XL" ? (
+                    <SizeBox size="XL" selected={true} />
+                  ) : (
+                    <SizeBox size="XL" selected={false} />
+                  )}
+                </TouchableOpacity>
+              </SizeContainer>
+            ) : null}
+
+            <AddToCartButton
+              disabled={size.length === 0 ? true : false}
+              onPress={() => addToCart(item)}
+            />
+          </View>
+        ) : (
+          <View className="justify-center">
+            <ActivityIndicator size={"large"} color="black" />
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 };

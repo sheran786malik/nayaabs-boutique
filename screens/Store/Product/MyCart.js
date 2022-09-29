@@ -242,6 +242,7 @@ const MyCart = () => {
           </Text>
         </View>
         <TouchableOpacity
+          disabled={!itemsExist}
           className="bg-black p-5 w-80 self-center rounded-3xl mt-5"
           // disabled={true}
           onPress={() => moveToCheckout()}

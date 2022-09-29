@@ -4,7 +4,7 @@ import React, { Component } from "react";
 export default class Card extends Component {
   render() {
     return (
-      <View className=" bg-white m-3 p-3 rounded-3xl w-44">
+      <View className=" bg-white m-3 p-2 rounded-3xl w-36">
         {this.props.children}
       </View>
     );

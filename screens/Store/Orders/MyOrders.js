@@ -21,8 +21,11 @@ import Card from "../../Components/Explore/Card";
 import { HeartIcon } from "react-native-heroicons/outline";
 
 const MyOrders = () => {
-  const [Orders, setOrders] = useState([]);
   const [ordersExist, setOrdersExist] = useState(false);
+  const [date, setDate] = useState([]);
+
+  const [Data, setData] = useState([]);
+  const [Orders, setOrders] = useState([]);
 
   // state = {
   //   orders: null,
@@ -36,15 +39,19 @@ const MyOrders = () => {
   }, []);
 
   const getInformation = () => {
+    let myOrders = [];
     auth.onAuthStateChanged((user) => {
       if (user) {
         db.collection("users")
           .doc(user.uid)
           .collection("orders")
           .get()
-          .then((data) =>
-            data.forEach((dat) => setOrders(dat.data().cartItems))
-          );
+          .then((data) => {
+            data.docs.map((res) => {
+              myOrders.push(res.data());
+            });
+            setData(myOrders);
+          });
       } else {
       }
     });
@@ -61,24 +68,32 @@ const MyOrders = () => {
         },
       },
     ];
+
     return (
       <Swipeout right={swipeoutBtns} style={{}}>
-        <View className="p-5">
+        <View className="p-5 bg-white mt-5">
           <View className="flex flex-row">
             <View className="flex flex-col">
               <Image
-                source={{ uri: "" }}
-                style={{ width: 100, height: 100, border: 1 }}
+                source={{ uri: item.image }}
+                style={{
+                  resizeMode: "contain",
+                  width: 100,
+                  height: 100,
+                  border: 1,
+                }}
                 className="self-center"
               />
             </View>
-
-            <View className="flex flex-col">
-              <Text className="">{item.id}</Text>
-              <Text className="w-52">{item.name}</Text>
+            <View className="flex flex-col self-center">
+              <Text className="w-52">{item.cartItems.name}</Text>
               <Text className="font-bold mt-3"> £{item.price}</Text>
-              <Text className=" font-bold mt-3"> {item.size}</Text>
+              <Text className="font-bold mt-3"> {item.date}</Text>
             </View>
+
+            {/* <Text className="">{item.id}</Text> */}
+
+            {/* <Text className=" font-bold mt-3"> {item.size}</Text> */}
           </View>
         </View>
       </Swipeout>
@@ -95,7 +110,7 @@ const MyOrders = () => {
         />
 
         <FlatList
-          data={Orders}
+          data={Data}
           renderItem={renderAllProducts}
           key={(data) => data.id}
         />

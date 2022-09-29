@@ -40,7 +40,8 @@ const CheckoutLogin = () => {
     });
   };
   const moveToGuestLogin = () => {
-    navigation.navigate("Me", { screen: "Checkout-not-logged-in" });
+    // navigation.navigate("Home", {}, { screen: "Checkout-not-logged-in" });
+    navigation.navigate("Checkout-not-logged-in");
   };
 
   const login = () => {

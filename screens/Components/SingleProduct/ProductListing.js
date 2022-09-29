@@ -3,32 +3,26 @@ import React, { useState, useEffect } from "react";
 import SizeBox from "./SizeBox";
 import AddToCartButton from "./AddToCartButton";
 import { useDispatch } from "react-redux";
+import HTMLView from "react-native-htmlview";
 
-export const ProductListing = ({ data }) => {
+export const ProductListing = ({ name, description, price }) => {
   const [selected, setSelected] = useState("");
 
   useEffect(() => {
     return () => {};
   }, []);
 
-  return (
-    <SafeAreaView
-      style={{
-        borderTopRightRadius: 45,
-        borderTopLeftRadius: 45,
-      }}
-    >
-      <View className="flex flex-col p-2">
-        <View className="flex flex-col justify-between">
-          <Text className="w-42 text-xl  text-center ">{data.name}</Text>
-          <Text className="text-xl font-bold text-right">£{data.price}</Text>
-        </View>
+  const regex = /(<([^>]+)>)/gi;
+  const result = description.replace(regex, "");
 
-        <View className="pt-5 text-gray-500">
-          <Text className=" text-gray-500 text-center">{data.description}</Text>
-        </View>
+  return (
+    <View className="flex flex-col p-2">
+      <View className="flex flex-col justify-between">
+        <Text className="w-42 text-xl  text-center ">{name}</Text>
+        <Text className="text-xl font-bold text-right">{price}</Text>
+        <Text>{result}</Text>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

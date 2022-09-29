@@ -32,7 +32,7 @@ export default class Login extends Component {
   componentDidMount() {
     auth.onAuthStateChanged((user) => {
       if (user) {
-        this.props.navigation.navigate("Profile");
+        this.props.navigation.navigate("LoggedIn");
       }
     });
   }
@@ -42,28 +42,25 @@ export default class Login extends Component {
       .signInWithEmailAndPassword(this.state.username, this.state.password)
       .then((user) => {
         console.log("Logged In");
-        this.props.navigation.navigate("Me");
+        this.props.navigation.navigate("LoggedIn");
       })
-      .catch((error) => console.log(error));
+      .catch((error) =>
+        alert(
+          "An error has occured when signing you up, please try again later"
+        )
+      );
   }
   render() {
     return (
       <SafeAreaView style={{ backgroundColor: "#FBFBFD", flex: 1 }}>
-        <View className="flex-row w-100 justify-between">
-          <TouchableOpacity
-            className="flex-row self-center"
-            onPress={() => this.props.navigation.navigate("Explore")}
-          >
-            <ChevronLeftIcon size={30} color="black" />
-          </TouchableOpacity>
-        </View>
-
         <View className="">
           <Image
             className="self-center "
             source={require("../../assets/nayaabslogo.png")}
             style={{
               resizeMode: "contain",
+              width: 100,
+              height: 100,
               backgroundColor: "black",
               borderRadius: 100,
             }}
@@ -79,7 +76,7 @@ export default class Login extends Component {
           </Text>
 
           <View
-            className="flex-row w-80 self-center p-5"
+            className="flex-row w-80 self-center p-5 pr-2 ml-2"
             style={{
               backgroundColor: "white",
             }}
@@ -87,7 +84,6 @@ export default class Login extends Component {
             <MailIcon size={40} color="black" />
             <TextInput
               placeholder="Email"
-              className="pl-2"
               autoCapitalize="none"
               keyboardType="email-address"
               onChangeText={(e) => this.setState({ username: e })}
@@ -95,7 +91,7 @@ export default class Login extends Component {
           </View>
 
           <View
-            className="flex-row w-80 self-center p-5 mt-8"
+            className="flex-row w-80 self-center p-5 pr-2 ml-2 mt-8"
             style={{
               backgroundColor: "white",
             }}
@@ -133,23 +129,23 @@ export default class Login extends Component {
           </Text>
         </TouchableOpacity>
         <View className="p-5 flex-row self-center">
-          <View className="self-center">
+          {/* <View className="self-center">
             <View style={{ borderWidth: 0.5, color: "black", width: 100 }} />
           </View>
           <Text className="self-center p-5 "> Or</Text>
           <View className="self-center">
             <View style={{ borderWidth: 0.5, color: "black", width: 100 }} />
-          </View>
+          </View> */}
         </View>
-        <View className="flex-row justify-evenly">
-          <TouchableOpacity>
+        {/* <View className="flex-row justify-evenly"> */}
+        {/* <TouchableOpacity>
             <AntDesign name="facebook-square" size={30} color="black" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
-          <TouchableOpacity>
+        {/* <TouchableOpacity>
             <AntDesign name="google" size={30} color="black" />
-          </TouchableOpacity>
-        </View>
+          </TouchableOpacity> */}
+        {/* </View> */}
 
         <View className="flex-row self-center p-5">
           <Text style={{ color: "grey" }}>Dont have an account? </Text>

@@ -21,12 +21,14 @@ import { useNavigation } from "@react-navigation/native";
 import { auth, db } from "../../../external/Firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { clear_cart, selectCartTotal } from "../../../features/cartSlice";
+import { SERVER_URL } from "../../../external/API";
 
 export const Payment = ({
   fullName,
   address,
   email,
   cartItems,
+  totalPrice,
   phoneNumber,
   delivery,
 }) => {
@@ -35,10 +37,10 @@ export const Payment = ({
   // const [email, setEmail] = useState(email)
   const navigation = useNavigation();
 
-  const [cardDetails, setCardDetails] = useState(cardDetails);
+  const [cardDetails, setCardDetails] = useState("");
   const { confirmPayment, loading } = useConfirmPayment();
   const [userID, setUserID] = useState("");
-  const totalPrice = useSelector(selectCartTotal);
+  // const totalPrice = useSelector(selectCartTotal);
 
   const today = new Date();
   const date =
@@ -57,16 +59,13 @@ export const Payment = ({
   // const [totalPrice, setTotalPrice] = useState(totalPrice)
 
   const fetchPaymentIntentClientSecret = async () => {
-    const response = await fetch(
-      "http://192.168.0.48:3000/create-payment-intent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: { totalPrice: totalPrice },
-      }
-    );
+    const response = await fetch(SERVER_URL + "create-payment-intent", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ totalPrice: totalPrice }),
+    });
     const { clientSecret, error } = await response.json();
 
     return { clientSecret, error };
@@ -161,6 +160,7 @@ export const Payment = ({
         country: "UK",
       },
       line_items: line_items,
+      date: date,
       shipping_lines: delivery
         ? {
             method_id: "flat_rate",
@@ -187,7 +187,7 @@ export const Payment = ({
   };
 
   const sendToDb = (userType, uid) => {
-    console.log("order has gone to wp");
+    // console.log("order has gone to wp");
     const randomNumber = Math.floor(Math.random() * 100) + 1;
 
     if (userType === "User") {
@@ -201,18 +201,21 @@ export const Payment = ({
           cartItems: cartItems,
         })
         .then((data) => {
-          console.log("order has gone to database");
+          // console.log("order has gone to database");
         })
         .catch((error) => console.log(error));
     } else {
+      let cart = {
+        ...cartItems,
+        date: date,
+      };
       db.collection("guest")
         // .doc(userID)
         .doc(randomNumber.toString())
         .collection("orders")
         .doc(randomNumber.toString())
         .set({
-          date: date,
-          cartItems: cartItems,
+          cartItems: cart,
         })
         .then((data) => {
           console.log("order has gone to database");

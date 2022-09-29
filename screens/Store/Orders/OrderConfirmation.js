@@ -27,13 +27,11 @@ const OrderConfirmation = ({ route }) => {
     (today.getDate() + 3);
   const [name, setName] = useState("");
 
-  const { fullName, address, phoneNumber } = route.params;
+  const { fullName, address, phoneNumber, totalPrice } = route.params;
 
   const navigation = useNavigation();
   useEffect(() => {
-    return () => {
-      setTodaysDateForDelivery();
-    };
+    return () => {};
   }, []);
   // const setTodaysDateForDelivery = () => {
   //   let today = new Date();
@@ -52,80 +50,101 @@ const OrderConfirmation = ({ route }) => {
   return (
     <SafeAreaView>
       <ImageBackground
-        className="justify-center self-center"
-        style={{
-          backgroundColor: "black",
-          width: 200,
-          height: 200,
-          borderRadius: 100,
-        }}
+        className="bg-black p-5 self-center"
+        style={{ borderRadius: 80 }}
       >
-        {cartItems.map((data) => {
-          <Image
-            className="self-center"
-            source={{ uri: "../../../assets/logo.png" }}
-            style={{ width: 150, height: 150, resizeMode: "contain" }}
-          />;
-        })}
+        <Image
+          className="self-center"
+          source={require("../../../assets/OrderConfirmLogo.png")}
+          style={{
+            resizeMode: "cover",
+          }}
+        />
       </ImageBackground>
 
-      <Text className="self-center font-bold pt-10" style={{ fontSize: 24 }}>
-        Thanks For Your Order
-      </Text>
+      <View className="m-3 w-63 ">
+        <Text
+          className="self-center font-bold last:text-center"
+          style={{ fontSize: 24 }}
+        >
+          Hey, {fullName}
+        </Text>
+        <Text
+          className="self-center font-bold text-center"
+          style={{ fontSize: 24 }}
+        >
+          Thanks For Your Purchase
+        </Text>
+      </View>
 
-      <Text
-        className="w-64 self-center text-center pt-5"
+      {/* <Text
+        className="w-64 self-center text-center"
         style={{ fontSize: 14, color: "grey" }}
       >
         An order confirmation has been sent to your email address
-      </Text>
+      </Text> */}
 
-      <View className="flex-col bg-black p-3 m-5 rounded-2xl ">
-        {cartItems.map((data) => {
-          <View className="flex-row justify-around ">
-            <Text style={{ color: "white" }}>Total Amount</Text>
-            <Text style={{ color: "white" }}>{data.price}</Text>
-          </View>;
-        })}
-        <View className="flex-row justify-between pb-3">
-          <Text style={{ color: "white" }}>Estimated Delivery</Text>
-          <Text style={{ color: "white" }}>{date.toString()}</Text>
+      {cartItems.map((data) => (
+        <View className="flex-col p-2">
+          <View
+            style={{
+              alignSelf: "flex-end",
+              width: "100%",
+              marginBottom: 20,
+              borderWidth: 0.5,
+              opacity: 0.5,
+            }}
+          />
+          <View className="flex-row justify-between">
+            <Text>Total Amount</Text>
+            <Text className="font-bold">{totalPrice}</Text>
+          </View>
+
+          <View className="flex-row justify-between pt-5">
+            <Text>Estimated Delivery</Text>
+            <Text className="font-bold">{date}</Text>
+          </View>
+
+          <View
+            style={{
+              alignSelf: "flex-end",
+              width: "100%",
+              marginTop: 20,
+              marginBottom: 20,
+              borderWidth: 0.5,
+              opacity: 0.5,
+            }}
+          />
+          <Text className="text-2xl font-bold">Billing Address</Text>
+          <View className="flex-row justify-between pt-5">
+            <Text>Customers Name</Text>
+            <Text className="font-bold">{fullName}</Text>
+          </View>
+
+          <View className="flex-row justify-between pt-5">
+            <Text>Phone Number</Text>
+            <Text className="font-bold">{phoneNumber}</Text>
+          </View>
+
+          <View className="flex-row justify-between pt-5">
+            <Text>Address</Text>
+            <Text className="font-bold">{address}</Text>
+          </View>
         </View>
-
-        <Text
-          className="font-semibold pb-3"
-          style={{ fontSize: 20, color: "white" }}
+      ))}
+      <View className="p-10">
+        <TouchableOpacity
+          onPress={() => continueShopping()}
+          className="bg-black p-5 w-80 self-center rounded-3xl "
         >
-          Billing Address
-        </Text>
-
-        <View className="flex flex-col">
-          <View className="flex-row justify-between pb-3">
-            <Text style={{ color: "white" }}>Customer Name</Text>
-            <Text style={{ color: "white", width: "40%" }}>{fullName}</Text>
-          </View>
-
-          <View className="flex-row justify-between pb-3">
-            <Text style={{ color: "white" }}>Phone Number</Text>
-            <Text style={{ color: "white", width: "40%" }}>{phoneNumber}</Text>
-          </View>
-          <View className="flex-row justify-between pb-3">
-            <Text style={{ color: "white" }}>Address</Text>
-            <Text style={{ color: "white", width: "40%" }}>{address}</Text>
-          </View>
-        </View>
+          <Text
+            className="text-center"
+            style={{ color: "white", fontWeight: "600" }}
+          >
+            Continue Shopping
+          </Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        onPress={() => continueShopping()}
-        className="bg-black p-5 w-80 self-center rounded-3xl mt-5"
-      >
-        <Text
-          className="text-center"
-          style={{ color: "white", fontWeight: "600" }}
-        >
-          Continue Shopping
-        </Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };

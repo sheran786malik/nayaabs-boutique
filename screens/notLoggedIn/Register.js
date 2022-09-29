@@ -54,6 +54,7 @@ export default class Register extends Component {
               fullName: this.state.fullName,
               address: this.state.address,
               phoneNo: this.state.phoneNo,
+              emailAddress: this.state.username,
             })
             .then((res) => {
               this.props.navigation.navigate("Profile");
@@ -69,13 +70,8 @@ export default class Register extends Component {
   validation() {}
   render() {
     return (
-      <SafeAreaView style={{ backgroundColor: "#FBFBFD", flex: 1 }}>
-        {/* <View className='flex-row w-100 justify-between'>
-                   
-
-                </View> */}
-
-        <KeyboardAwareScrollView>
+      <KeyboardAwareScrollView>
+        <SafeAreaView style={{ backgroundColor: "#FBFBFD", flex: 1 }}>
           <View className="">
             <Image
               className="self-center "
@@ -84,8 +80,8 @@ export default class Register extends Component {
                 resizeMode: "contain",
                 backgroundColor: "black",
                 borderRadius: 100,
-                width: 100,
-                height: 100,
+                width: 80,
+                height: 80,
               }}
             />
             <Text
@@ -99,47 +95,48 @@ export default class Register extends Component {
             </Text>
 
             <View
-              className="flex-row w-80 self-center p-3"
+              className="flex-row w-80 self-center p-3 border rounded-xl"
               style={{
                 backgroundColor: "white",
               }}
             >
-              <UserIcon size={30} color="black" />
               <TextInput
-                placeholder="Name"
+                placeholder="Full Name"
                 autoCapitalize="none"
-                className="pl-2"
+                className="pl-2 "
+                placeholderTextColor={"black"}
                 onChangeText={(e) => this.setState({ fullName: e })}
               />
             </View>
 
             <View
-              className="flex-row w-80 self-center p-3 mt-2"
+              className="flex-row w-80 self-center p-3 border rounded-xl mt-5"
               style={{
                 backgroundColor: "white",
               }}
             >
-              <MailIcon size={30} color="black" />
               <TextInput
                 placeholder="Email"
                 className="pl-2"
+                textContentType="emailAddress"
                 autoCapitalize="none"
+                placeholderTextColor={"black"}
                 keyboardType="email"
                 onChangeText={(e) => this.setState({ username: e })}
               />
             </View>
 
             <View
-              className="flex-row w-80 self-center p-3 mt-2"
+              className="flex-row w-80 self-center p-3 border rounded-xl mt-5"
               style={{
                 backgroundColor: "white",
               }}
             >
-              <LockClosedIcon size={30} color="black" />
               <TextInput
                 placeholder="Password"
                 className="pl-2"
                 autoCapitalize="none"
+                placeholderTextColor={"black"}
                 onChangeText={(e) => this.setState({ password: e })}
                 secureTextEntry={true}
               />
@@ -152,74 +149,65 @@ export default class Register extends Component {
             </View>
 
             <View
-              className="flex-row w-80 self-center p-3 mt-2"
+              className="flex-row w-80 self-center p-3 border rounded-xl m-2"
               style={{
                 backgroundColor: "white",
               }}
             >
-              <LockClosedIcon size={30} color="black" />
               <TextInput
                 placeholder="Confirm Password"
                 className="pl-2"
+                placeholderTextColor={"black"}
                 autoCapitalize="none"
                 onChangeText={(e) => this.setState({ confPassword: e })}
                 secureTextEntry={true}
               />
             </View>
-
             <View
-              className="flex-row w-80 self-center p-3 mt-2"
+              className="flex-row w-80 self-center p-3 border rounded-xl mt-5"
               style={{
                 backgroundColor: "white",
               }}
             >
-              <LocationMarkerIcon size={30} color="black" />
-              <TextInput
-                placeholder="Address"
-                className="pl-2"
-                autoCapitalize="none"
-                onChangeText={(e) => this.setState({ address: e })}
-              />
-            </View>
-
-            <View
-              className="flex-row w-80 self-center p-3 mt-1"
-              style={{
-                backgroundColor: "white",
-              }}
-            >
-              <PhoneIcon size={30} color="black" />
               <TextInput
                 placeholder="Phone Number"
+                placeholderTextColor={"black"}
                 keyboardType="number-pad"
                 className="pl-2"
                 onChangeText={(e) => this.setState({ phoneNo: e })}
               />
             </View>
+
+            <View
+              className="flex-row w-80 self-center p-3 border rounded-xl mt-5"
+              style={{
+                backgroundColor: "white",
+              }}
+            >
+              <TextInput
+                placeholder="Address"
+                placeholderTextColor={"black"}
+                className="pl-2"
+                autoCapitalize="none"
+                onChangeText={(e) => this.setState({ address: e })}
+              />
+            </View>
           </View>
 
           <View className=" flex-row w-80 self-center p-3 mt-1">
-            <CheckBox
-              isChecked={this.state.termsAndConditions}
-              onClick={(value) =>
-                this.setState({
-                  termsAndConditions: !this.state.termsAndConditions,
-                })
-              }
-            />
-            <View className="flex-row self-center ">
+            <View className="flex-row self-center w-">
               <Text className="self-center mr-1" style={{ color: "grey" }}>
-                I accept all the
+                By Registering, you agree to the
+                <TouchableOpacity
+                  onPress={() =>
+                    this.props.navigation.navigate("TermsAndConditions")
+                  }
+                >
+                  <Text className="self-center font-bold">
+                    Terms & Conditions
+                  </Text>
+                </TouchableOpacity>
               </Text>
-              <TouchableOpacity
-                onPress={() =>
-                  this.props.navigation.navigate("TermsAndConditions")
-                }
-              >
-                <Text className="self-center font-bold">
-                  Terms & Conditions
-                </Text>
-              </TouchableOpacity>
             </View>
           </View>
           <TouchableOpacity
@@ -231,7 +219,7 @@ export default class Register extends Component {
               className="text-center"
               style={{ color: "white", fontWeight: "600" }}
             >
-              Register
+              Create Account
             </Text>
           </TouchableOpacity>
 
@@ -243,8 +231,8 @@ export default class Register extends Component {
               <Text className="font-bold">Log in</Text>
             </TouchableOpacity>
           </View>
-        </KeyboardAwareScrollView>
-      </SafeAreaView>
+        </SafeAreaView>
+      </KeyboardAwareScrollView>
     );
   }
 }

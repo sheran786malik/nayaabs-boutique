@@ -7,6 +7,7 @@ import {
   FlatList,
   View,
   Text,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -25,12 +26,14 @@ import { auth, db } from "../../../external/Firebase";
 import { WooCommerce } from "../../../external/WoocommerceAPI";
 import { useDispatch, useSelector } from "react-redux";
 import { selectItem } from "../../../features/wishlistSlice";
+import { SERVER_URL } from "../../../external/API";
 
 const AllProducts = ({ route, props }) => {
   const [data, setData] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchActivated, setSearchActivated] = useState(false);
   const [userID, setUserID] = useState("");
+  const [itemsAvailable, setItemsAvailable] = useState(false);
 
   const [favourite, setFavourite] = useState(false);
   const dispatch = useDispatch();
@@ -38,18 +41,34 @@ const AllProducts = ({ route, props }) => {
 
   useEffect(() => {
     try {
-      getSignedInUser();
-      fetchInfo();
+      getProducts();
     } catch (error) {
       console.log(error);
     }
   }, []);
 
-  const fetchInfo = async () => {
-    WooCommerce.get("products", { per_page: 100 }).then((data) => {
-      setData(data);
-      setFilteredProducts(data);
-    });
+  const getProducts = () => {
+    WooCommerce.get("products", { per_page: 30 })
+      .then((data) => {
+        let productList = [];
+        data.map((data) => {
+          productList.push({
+            id: data.id,
+            name: data.name,
+            image: data.images[0].src,
+            price: data.price,
+            category: data.categories[0].name,
+            description: data.description,
+          });
+          // setUserID(null);
+          setData(productList);
+          // setFilteredProducts(productList);
+          setItemsAvailable(true);
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const getSignedInUser = () => {
@@ -68,7 +87,7 @@ const AllProducts = ({ route, props }) => {
       .doc(item.name)
       .set({
         name: item.name,
-        image: item.images[0].src,
+        image: item.image,
         price: item.price,
       })
       .then(() => setFavourite(true), console.log("added to favourites!"));
@@ -83,52 +102,60 @@ const AllProducts = ({ route, props }) => {
       .then(() => setFavourite(false), console.log("deleted from favourites!"));
   };
 
-  const isItemInWishlist = (item) => {};
   const renderAllProducts = ({ item }) => {
-    // if(dispatch(selectItem(item)) == -1){
-    //   favourite === false;
-    // }
     return (
       <Card>
-        {favourite === false ? (
-          <TouchableOpacity
-            onPress={() => addToFavourites(item)}
-            style={{ zIndex: 999, position: "absolute", right: 10, top: 10 }}
-          >
-            <AntDesign name="hearto" size={30} color="black" />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            onPress={() => deleteFromFavourites(item)}
-            style={{ zIndex: 999, position: "absolute", right: 10, top: 10 }}
-          >
-            <AntDesign name="heart" size={30} color="black" />
-          </TouchableOpacity>
-        )}
-
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("Product", {
               productID: item.id,
+              productName: item.name,
+              productImage: item.image,
+              productDescription: item.description,
+              productCategory: item.category,
+              productPrice: item.price,
             })
           }
         >
           <Image
-            source={{ uri: item.images[0].src }}
+            className="self-center"
+            source={{ uri: item.image }}
             style={{
-              width: 100,
+              width: 150,
               height: 200,
               resizeMode: "cover",
-              margin: 8,
             }}
           />
 
-          <View className="flex-row w-32 justify-between bg-dark">
-            <Text claßssName="w-20" style={{ color: "black" }}>
+          <View className="flex-col bg-dark p-3">
+            <Text className="font-bold pt-3">£{item.price}</Text>
+            <Text className="pt-3" style={{ color: "grey", fontSize: 11 }}>
               {item.name}
             </Text>
-            <Text className="font-bold">{item.price}</Text>
           </View>
+          {item.category === "Unstitched" ? (
+            <TouchableOpacity
+              className="bg-black p-3 self-center rounded-xl"
+              onPress={() =>
+                dispatch(
+                  addToBasket({
+                    id: item.id,
+                    name: item.name,
+                    image: item.image,
+                    quantity: 1,
+                    price: item.price,
+                  })
+                )
+              }
+              style={{
+                width: 150,
+              }}
+            >
+              <Text className="text-white text-center font-bold  ">
+                Add to Cart
+              </Text>
+            </TouchableOpacity>
+          ) : null}
         </TouchableOpacity>
       </Card>
     );
@@ -147,40 +174,6 @@ const AllProducts = ({ route, props }) => {
       setFilteredProducts(data);
     }
   };
-
-  const renderItem = ({ item }) => {
-    return (
-      <View
-        className="p-5 bg-white m-2 rounded-3xl"
-        key={item.id}
-        style={{ width: Dimensions.get("screen").width / 2.5 }}
-      >
-        {/* {item.favourite ? <AntDesign style={{ zIndex: 999, position: 'absolute', right: 10, top: 10, }} name='heart' size={30} color='black' />
-          : <AntDesign style={{ zIndex: 999, position: 'absolute', right: 10, top: 10, }} name='hearto' size={30} color='black' />
-
-        } */}
-
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("Product", {
-              productID: item.id,
-            })
-          }
-        >
-          <Image
-            source={item.image}
-            style={{ width: 100, height: 100, margin: 8 }}
-          />
-
-          <View className="flex-row w-32 justify-between">
-            <Text className="w-20">{item.title}</Text>
-            <Text className="font-bold">{item.price}</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
   return (
     <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
       <View style={{ marginTop: 20 }} />
@@ -194,7 +187,7 @@ const AllProducts = ({ route, props }) => {
             className="self-center"
             style={{ fontWeight: "600", fontSize: 20 }}
           >
-            All Clothing{" "}
+            All Clothing
           </Text>
         </View>
         <View className="flex-row w-80 self-center justify-between p-4 rounded-3xl bg-white">
@@ -213,54 +206,52 @@ const AllProducts = ({ route, props }) => {
               onChangeText={(item) => searchProducts(item)}
             />
           </View>
-
-          <TouchableOpacity className="bg-black p-2 rounded-xl">
-            <AdjustmentsIcon
-              style={{ transform: [{ rotate: "90deg" }] }}
-              size={20}
-              color="white"
-              className="self-center"
-            />
-          </TouchableOpacity>
         </View>
-        <FlatList
-          data={data}
-          numColumns={2}
-          renderItem={renderAllProducts}
-          keyExtractor={(item) => item.id}
-        />
+        {itemsAvailable ? (
+          <FlatList
+            data={data}
+            numColumns={2}
+            renderItem={renderAllProducts}
+            keyExtractor={(item) => item.id}
+          />
+        ) : (
+          <View className="self-center justify-center">
+            <ActivityIndicator size={"large"} color="black" />
+          </View>
+        )}
+
         {/* {Object.values(data).map((item) => {
-          return (
-            <Card>
-              <View className='p-5 bg-white m-2 rounded-3xl' key={item.id} style={{ width: Dimensions.get('screen').width / 2.5 }}>
-
-                <TouchableOpacity onPress={() => navigation.navigate('Product', {
-                  productID: item.id,
-                })}>
-                  <Image source={{ uri: item.images[0].src }} style={{ width: 100, height: 100, resizeMode: 'contain', margin: 8 }} />
-
-
-
-                  <View className='flex-row w-32 justify-between'>
-                    <Text className='w-20'>{item.name}</Text>
-                    <Text className='font-bold'>{item.price}</Text>
-                  </View>
-                </TouchableOpacity>
-
-              </View>
-            </Card>
-
-          )
-        })
-
-        } */}
+            return (
+              <Card>
+                <View className='p-5 bg-white m-2 rounded-3xl' key={item.id} style={{ width: Dimensions.get('screen').width / 2.5 }}>
+  
+                  <TouchableOpacity onPress={() => navigation.navigate('Product', {
+                    productID: item.id,
+                  })}>
+                    <Image source={{ uri: item.images[0].src }} style={{ width: 100, height: 100, resizeMode: 'contain', margin: 8 }} />
+  
+  
+  
+                    <View className='flex-row w-32 justify-between'>
+                      <Text className='w-20'>{item.name}</Text>
+                      <Text className='font-bold'>{item.price}</Text>
+                    </View>
+                  </TouchableOpacity>
+  
+                </View>
+              </Card>
+  
+            )
+          })
+  
+          } */}
 
         {/* 
-        <FlatList
-          numColumns={2}
-          data={filteredProducts}
-          renderItem={renderAllProducts}
-        />  */}
+          <FlatList
+            numColumns={2}
+            data={filteredProducts}
+            renderItem={renderAllProducts}
+          />  */}
       </SafeAreaView>
     </SafeAreaView>
   );
