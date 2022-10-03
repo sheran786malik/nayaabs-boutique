@@ -53,6 +53,10 @@ app.listen(port, () => {
   console.log("App online");
 });
 
+app.get("/", (req, res) => {
+  res.send("App is running");
+});
+
 app.post("/create-payment-intent", async (req, res) => {
   console.log("Request body:", req.body);
   try {

@@ -31,6 +31,9 @@ const OrderConfirmation = ({ route }) => {
 
   const navigation = useNavigation();
   useEffect(() => {
+    setTimeout(() => {
+      navigation.navigate("Explore");
+    }, 10000);
     return () => {};
   }, []);
   // const setTodaysDateForDelivery = () => {

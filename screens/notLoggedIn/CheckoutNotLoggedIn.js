@@ -55,9 +55,9 @@ export default function CheckoutNotLoggedIn({ navigation }) {
   const [cardDetails, setCardDetails] = useState();
   const { confirmPayment, loading } = useConfirmPayment();
 
-  const [cartItems, setCartItems] = useState(useSelector(selectCartItems));
+  const cartItems = useSelector(selectCartItems);
 
-  const [totalPrice, setTotalPrice] = useState(useSelector(selectCartTotal));
+  const totalPrice = useSelector(selectCartTotal);
 
   const [editing, setEditing] = useState("false");
   useEffect(() => {}, []);
@@ -195,7 +195,7 @@ export default function CheckoutNotLoggedIn({ navigation }) {
           <View className="flex-row justify-between mt-5">
             <Text className="text-gray-500">Total</Text>
             <Text className="font-bold text-xl">
-              {parseInt(totalPrice + deliveryFee)}
+              {totalPrice + deliveryFee}
             </Text>
           </View>
         </View>
@@ -205,7 +205,7 @@ export default function CheckoutNotLoggedIn({ navigation }) {
             fullName={fullName}
             cardDetails={cardDetails}
             address={address}
-            totalPrice={parseInt(totalPrice + deliveryFee)}
+            totalPrice={totalPrice + deliveryFee}
             cartItems={cartItems}
             phoneNumber={phoneNumber}
           />

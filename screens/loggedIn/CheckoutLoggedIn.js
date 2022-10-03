@@ -12,6 +12,7 @@ import {
   PlusIcon,
   MinusIcon,
   ThumbDownIcon,
+  PencilIcon,
 } from "react-native-heroicons/outline";
 import { PaymentIcon } from "react-native-payment-icons";
 import Header from "../Components/Header/Header";
@@ -30,6 +31,7 @@ import SwipeButton from "rn-swipe-button";
 import { Payment } from "../Components/Payment/Payment";
 import { useSelector } from "react-redux";
 import { selectCartItems, selectCartTotal } from "../../features/cartSlice";
+import { TextInput } from "react-native-gesture-handler";
 
 const CheckoutLoggedIn = () => {
   const [homeIsChecked, setHomeIsChecked] = useState(false);
@@ -38,6 +40,10 @@ const CheckoutLoggedIn = () => {
   const [userData, setUserData] = useState([]);
   const totalPrice = useSelector(selectCartTotal);
   const cartItems = useSelector(selectCartItems);
+
+  const [address, setAddress] = useState("");
+
+  const [editing, setEditing] = useState(false);
 
   const navigation = useNavigation();
 
@@ -106,11 +112,24 @@ const CheckoutLoggedIn = () => {
             }}
             isChecked={homeIsChecked}
           />
-          <View className="self-center">
-            <Text style={{ fontSize: 16 }}>Home</Text>
-            <Text style={{ fontSize: 12, color: "lightgrey" }}>
-              {userData ? userData.address : "An error has occured"}
-            </Text>
+          <View className="">
+            <View className="flex flex-row justify-between w-52">
+              <Text style={{ fontSize: 16 }}>Home</Text>
+              <TouchableOpacity onPress={() => setEditing(!editing)}>
+                <PencilIcon size={"20"} color="black" />
+              </TouchableOpacity>
+            </View>
+            {editing === false ? (
+              <Text style={{ fontSize: 12, color: "lightgrey" }}>
+                {userData ? userData.address : "An error has occured"}
+              </Text>
+            ) : (
+              <TextInput
+                placeholder="Enter address"
+                value={address}
+                onChangeText={(e) => setAddress(e)}
+              />
+            )}
           </View>
         </View>
 
@@ -174,7 +193,7 @@ const CheckoutLoggedIn = () => {
               email={userData.emailAddress}
               fullName={userData.fullName}
               address={userData.address}
-              totalPrice={parseInt(totalPrice + deliveryFee)}
+              totalPrice={totalPrice + deliveryFee}
               cartItems={cartItems}
               phoneNumber={userData.phoneNo}
               delivery={homeIsChecked ? true : false}

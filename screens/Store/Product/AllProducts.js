@@ -62,7 +62,7 @@ const AllProducts = ({ route, props }) => {
           });
           // setUserID(null);
           setData(productList);
-          // setFilteredProducts(productList);
+          setFilteredProducts(productList);
           setItemsAvailable(true);
         });
       })
@@ -209,7 +209,7 @@ const AllProducts = ({ route, props }) => {
         </View>
         {itemsAvailable ? (
           <FlatList
-            data={data}
+            data={filteredProducts}
             numColumns={2}
             renderItem={renderAllProducts}
             keyExtractor={(item) => item.id}

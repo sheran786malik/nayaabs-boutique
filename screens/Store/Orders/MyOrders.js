@@ -48,7 +48,7 @@ const MyOrders = () => {
           .get()
           .then((data) => {
             data.docs.map((res) => {
-              myOrders.push(res.data());
+              myOrders.push(res.data().cartItems[0]);
             });
             setData(myOrders);
           });
@@ -86,7 +86,7 @@ const MyOrders = () => {
               />
             </View>
             <View className="flex flex-col self-center">
-              <Text className="w-52">{item.cartItems.name}</Text>
+              <Text className="w-52">{item.name}</Text>
               <Text className="font-bold mt-3"> £{item.price}</Text>
               <Text className="font-bold mt-3"> {item.date}</Text>
             </View>

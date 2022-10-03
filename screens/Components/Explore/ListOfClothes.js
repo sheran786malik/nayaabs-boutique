@@ -31,9 +31,14 @@ const ListOfClothes = ({ selected }) => {
 
   const dispatch = useDispatch();
 
-  useEffect(async () => {
-    // const getProducts = () => {
-    await WooCommerce.get("products", { per_page: 30 })
+  useEffect(() => {
+    getInfo();
+
+    return () => {};
+  }, []);
+
+  const getInfo = () => {
+    WooCommerce.get("products", { per_page: 30 })
       .then((data) => {
         let productList = [];
         data.map((data) => {
@@ -49,19 +54,14 @@ const ListOfClothes = ({ selected }) => {
         });
         // dispatch(addToStock(productList));
         setInfo(productList);
-        filterData(info);
-
+        filterData(productList);
         setItemsAvailable(true);
       })
 
       .catch((error) => {
         console.log(error);
       });
-    // };
-    // filterData(info);
-
-    return () => {};
-  }, []);
+  };
 
   const filterData = (information) => {
     let stitchedList = [];
@@ -75,7 +75,6 @@ const ListOfClothes = ({ selected }) => {
         }
       });
     }
-
     setStitchedList(stitchedList);
     setUnstitchedList(unstitchedList);
   };

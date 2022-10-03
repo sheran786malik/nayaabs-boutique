@@ -113,7 +113,7 @@ const MyDetails = () => {
               textDecorationColor: "#ECECEC",
             }}
             value={fullName}
-            onChangeText={(e) => setUsername(e)}
+            onChangeText={(e) => setFullName(e)}
           />
         </View>
 
